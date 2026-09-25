@@ -41,6 +41,13 @@ Each script's header records its settings, fixed before it was run.
 | trend_ensemble.py | T1 multi-horizon trend (5 to 360-day closing highs, trailing midpoint stop, long only); T3 MAX-10 next-day continuation | **Pass.** T1 daily Sharpe 1.53 design, 1.49 held-out, 1.18 fresh (with the 0.5% stop rail). MAX-10 +0.11R (t 4.7), +0.08R, +0.06R |
 | max10_checks.py | MAX-10 robustness: per coin and year, taker entry, no stop, lookbacks 5 to 30, short side | Holds at every lookback and with taker entry; 12 of 15 years positive; shorts lose |
 | trend_subset.py | Trend with three lookbacks (20, 60, 150) for manual use | Holds: daily Sharpe 1.03 design, 1.00 held-out, 0.90 fresh |
+| tv_indicators.py | Harmonic XABCD patterns (standard ratio table, ZigZag P = 8) and LuxAlgo Trendlines with Breaks, 1h and 4h | Fail: harmonics -0.14R and -0.30R design; trendline breaks -0.13R (1h), +0.13R (4h, t 2.4) with a negative second half and held-out |
+| range_deviation.py | Range deviation reclaim (sweep, then close back inside) and trend-aligned range fades | Fail: -0.29R to -0.46R in every set; BTC on 5m bars -0.58R |
+| remaining_lines.py | Trend shorts, CPI/FOMC brackets, liquidation-spike fade, BTC-to-alt lead-lag | Fail. Trend shorts paid in 2018 (+1.35R) and 2022 (+0.30R) only; held-out -0.08R |
+| orb.py | Opening-range breakout at the US open on BTC (5m and 15m) and alts (15m); trend shorts in a down market | Fail: ORB -0.21R to -0.32R; down-market shorts +0.45R design but -0.11R held-out |
+| vb_pairs.py | Larry Williams volatility breakout (long, short); pair MAX-10 against BTC | Fail |
+| max10_intraday.py | MAX-10 as a same-day trade, and with a pullback entry | About 0R: the edge accrues outside 08:00 to 21:00 UTC |
+| stocks_intraday.py | US stocks on 5m bars (TQQQ, SPXL, SOXL and 2x single-stock ETFs as proxies, 2020-26): ORB-5, ORB-15, intraday momentum, overnight drift, MAX-10, trend long and short | Fail at Bitunix stock-perp costs: ORB-5 -0.55R, intraday momentum -0.20% a trade, trend shorts -0.29R |
 | fetch_data.py | Rebuilds `data/` from the public sources | |
 
 Rules for any change: net of fees, t of 3 or more, the same sign in both halves, and a held-out period run once. Count every variant tried.
@@ -53,3 +60,5 @@ Data sources:
 - github.com/finom/static-klines (10 majors)
 - github.com/arkanoeth/Binance_Future_Prices and github.com/cryptobigbro/binance-BTCUSDT (older hourly data)
 - github.com/supervik/historical-funding-rates-fetcher and github.com/ZuShen168/funding_rate_data (funding rates)
+- github.com/piekstra/market-data (5-minute US leveraged ETF candles, 2020-26)
+- macro_events.csv: CPI (bls.gov) and FOMC (federalreserve.gov) release dates, 2017-26

@@ -4,3 +4,5 @@ __pycache__/
 edge_trades.csv
 regime_trades.csv
 trades.csv
+*_trades.csv
+trend_t1_*.csv
