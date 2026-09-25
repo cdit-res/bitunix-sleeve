@@ -1,0 +1,6 @@
+data/
+__pycache__/
+*.pyc
+edge_trades.csv
+regime_trades.csv
+trades.csv
