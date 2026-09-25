@@ -7,7 +7,8 @@ Usage:
   python engine.py regime [SYMS]          market trend and each symbol's volatility state
   python engine.py candidates [SYMS]      mechanical 4h candidates with regime tags and flags
   python engine.py levels [SYMS]          tested supports, resistances and trendlines; stop 1.0 ATR beyond
-  python engine.py gap                    BTC weekend gap status (paper tracking only)
+  python engine.py edges [SYMS]           tested edges (journal entry 47): MAX-10 action and trend components
+  python engine.py gap                    retired: CME bitcoin futures trade 24/7 since 29 May 2026
   python engine.py score TICKETS.csv      score split tickets on 15m bars, stop first
 Ticket CSV columns: id,sym,side,placed_utc,valid_until_utc,entry,stop,tp1,tp2  (side 1 or -1)
 """
@@ -262,6 +263,58 @@ def weekend_gap() -> dict:
                              "tp1_1R": b + side * risk, "tp2_3R": b + side * 3 * risk}}
 
 
+# ---------- tested edges (journal entry 47; paper from 28 September 2026) ----------
+TREND_N = (5, 10, 20, 30, 60, 90, 150, 250, 360)
+MIN_STOP_PCT = 0.5  # sleeve rail: stops under 0.5% do not print
+
+
+@lru_cache(maxsize=32)
+def daily_long(sym: str) -> pd.DataFrame:
+    """Completed daily bars (00:00 UTC) over about four years, enough for the 360-day component."""
+    start = (pd.Timestamp.now('UTC') - pd.Timedelta(days=1500)).strftime("%Y-%m-%d")
+    d = klines(sym, "1d", start)
+    today = pd.Timestamp.now('UTC').tz_localize(None).normalize()
+    return d[d.index < today]
+
+
+def max10(sym: str) -> dict:
+    """MAX-10: long the morning after a daily close at or above the prior 10 closes; stop 1 daily ATR below
+    entry; exit at the next morning's run unless the signal repeats (then roll as a fresh one-day ticket)."""
+    d = daily_long(sym); c = d.c; a = atr(d); hi = c.rolling(10).max().shift(1)
+    sig, held = bool(c.iat[-1] >= hi.iat[-1]), bool(c.iat[-2] >= hi.iat[-2])
+    yday = pd.Timestamp.now('UTC').tz_localize(None).normalize() - pd.Timedelta(days=1)
+    action = "roll" if sig and held else "buy" if sig else "close at this run" if held else "none"
+    return dict(sym=sym, day=str(d.index[-1].date()), data_current=bool(d.index[-1] == yday), close=round(c.iat[-1], 6),
+                prior_10d_high=round(hi.iat[-1], 6), action=action, atr=round(a.iat[-1], 6),
+                stop_pct=round(a.iat[-1] / c.iat[-1] * 100, 2), guaranteed_stop=sym in GUARANTEED_STOP)
+
+
+def trend_components(sym: str) -> list[dict]:
+    """Multi-horizon trend, long only: each lookback N goes long on a close at or above the prior N closes,
+    stop at the midpoint of the N-day closing range, trailed up after each close and never lowered."""
+    d = daily_long(sym); c, lo = d.c.values, d.l.values; out = []
+    for n in TREND_N:
+        mx = pd.Series(c).rolling(n).max(); mn = pd.Series(c).rolling(n).min()
+        prev_hi = mx.shift(1).values; mid = ((mx + mn) / 2).values
+        long, stop, since = False, np.nan, None
+        for t in range(n, len(c)):
+            if long:
+                if lo[t] <= stop:
+                    long = False
+                else:
+                    stop = max(stop, mid[t])
+            if not long and c[t] >= prev_hi[t] and (c[t] - mid[t]) / c[t] * 100 >= MIN_STOP_PCT:
+                long, stop, since = True, mid[t], d.index[t]
+        if len(c) < n + 2:
+            state = "insufficient history"
+        else:
+            state = "new entry" if long and since == d.index[-1] else "long" if long else "flat"
+        out.append(dict(sym=sym, lookback=n, state=state, since=str(since.date()) if long else "",
+                        stop=round(stop, 6) if long else None,
+                        stop_pct=round((c[-1] - stop) / c[-1] * 100, 2) if long else None))
+    return out
+
+
 # ---------- scoring ----------
 def score(tickets: pd.DataFrame) -> pd.DataFrame:
     """Split tickets: half to tp1, half to tp2, one stop. Maker entry; stop first when a bar spans both."""
@@ -305,8 +358,18 @@ def main(argv: list[str]) -> None:
     elif cmd == "levels":
         trend = market_trend(); rows = [r for s in syms for r in levels(s, trend)]
         print(pd.DataFrame(rows).to_string(index=False) if rows else "no tested levels near price")
+    elif cmd == "edges":
+        core = syms if len(argv) > 2 else ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT"]
+        print("MAX-10 (paper; 1 daily ATR stop below entry; one bet split across coins signalling the same day)")
+        print(pd.DataFrame([max10(s) for s in core]).to_string(index=False))
+        rows = [r for s in core for r in trend_components(s)]
+        t = pd.DataFrame(rows)
+        print("\nTrend components (paper; long only; exit on the stop; stop trails up to the range midpoint daily)")
+        print(t.to_string(index=False))
+        live = t[t.state.isin(["long", "new entry"])]
+        print("\nActive components per coin: " + ", ".join(f"{s} {int((live.sym == s).sum())}/{len(TREND_N)}" for s in core))
     elif cmd == "gap":
-        print(json.dumps(weekend_gap(), indent=2, default=float))
+        print("retired (journal entry 47): CME bitcoin futures trade 24/7 since 29 May 2026, so the weekly gap no longer forms")
     elif cmd == "score":
         print(score(pd.read_csv(argv[2])).to_string(index=False))
     else:
