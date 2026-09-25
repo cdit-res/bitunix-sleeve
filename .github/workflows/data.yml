@@ -1,0 +1,42 @@
+name: data
+# Public market data for the runs and the research, published to the `data` branch (see data_feed/fetch.py).
+on:
+  push:
+    branches: [main]
+    paths: ["data_feed/**", ".github/workflows/data.yml"]
+  schedule:
+    - cron: "7 * * * *"          # hourly refresh of live data
+    - cron: "22 7,8 * * 1-5"     # just before the 08:30 UK run (BST, GMT)
+    - cron: "48 18,19 * * 1-5"   # just before the 20:00 UK run (BST, GMT)
+    - cron: "37 22 * * 1-5"      # daily research refresh after the US close
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: data
+  cancel-in-progress: false
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q yfinance pandas requests
+      - name: fetch
+        run: |
+          git clone -q --depth 1 --branch data "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" out || mkdir -p out
+          R=""
+          if [ "${{ github.event_name }}" != "schedule" ] || [ "${{ github.event.schedule }}" = "37 22 * * 1-5" ] || [ ! -d out/research ]; then R="--research"; fi
+          python data_feed/fetch.py out $R
+      - name: publish
+        run: |
+          cd out
+          if [ -d .git ]; then git checkout -q --orphan next; else git init -q -b next; fi
+          git config user.name "data-feed"
+          git config user.email "data-feed@users.noreply.github.com"
+          git add -A
+          git commit -qm "data $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" next:data
