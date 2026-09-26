@@ -232,13 +232,6 @@ def alignment(side: int, trend: str) -> str:
     return "market flat" if trend == "flat" else ("with market" if (trend == "up") == (side == 1) else "against market")
 
 
-def chasing(sym: str, side: int) -> bool:
-    d = completed(bars(sym, "1d"), "1d") if is_crypto(sym) else bars(sym, "1d")
-    e20 = d.c.ewm(span=20, adjust=False).mean(); a = atr(d)
-    stretch = side * (d.c.iat[-1] - e20.iat[-1]) / a.iat[-1]; run5 = side * (d.c.iat[-1] / d.c.iat[-6] - 1)
-    return bool(stretch > 2 or run5 > 0.10)
-
-
 # ---------- tickets ----------
 def ticket(sym: str, side: int, entry: float, stop: float, tp2: float, equity: float, tp1: float | None = None) -> dict:
     risk = abs(entry - stop); stop_pct = risk / entry * 100
@@ -301,12 +294,11 @@ def structures(sym: str, equity: float) -> list[dict]:
         t = ticket(sym, side, entry, stop, tp2, equity, tp1); al = alignment(side, trend); flags = []
         if t["stop_pct"] < 0.5: flags.append("stop under 0.5%")
         if t["net_rr_a"] < FLOOR: flags.append(f"net {t['net_rr_a']}:1 under {FLOOR}:1")
-        if chasing(sym, side): flags.append("CHASING")
         if base(sym) not in GUARANTEED_STOP: flags.append("no guaranteed stop")
         if al == "against market" and vol == "high vol": flags.append("against market in high vol")
         if setup == "failed move" and al == "market flat": flags.append("flat-market failed move, under test")
         if setup == "pullback" and vol == "high vol": flags.append("high-vol pullback needs divergence or pattern")
-        blocking = [f for f in flags if f.startswith(("stop under", "net ", "CHASING"))]
+        blocking = [f for f in flags if f.startswith(("stop under", "net "))]
         up = completed(bars(sym, "1d"), "1d") if (tf == "4h" and is_crypto(sym)) else (bars(sym, "1d") if tf == "4h" else None)
         out.append(dict(sym=base(sym), setup=setup, side="long" if side == 1 else "short", order=order,
                         entry=_fmt(entry), stop=_fmt(stop), tp1=_fmt(t["tp1"]), tp2=_fmt(tp2), stop_pct=t["stop_pct"],
