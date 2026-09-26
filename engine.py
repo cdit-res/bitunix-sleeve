@@ -11,6 +11,7 @@ Usage:
   python engine.py verdict state.csv "K1=TAKE:reason" "K2=PASS:reason"   log judged candidates from the last scan
   python engine.py html brief.json                  the brief as HTML (brief.html) and plain text (brief.txt)
 State CSV columns: id,run,sym,side,verdict,setup,entry,stop,tp1,tp2,valid_until,status,filled_at,closed_at,R,live,note
+  R holds the open R for open rows and the realised R once a row resolves; only resolved rows enter the record.
   side long or short; verdict TAKE, PASS or OWN; status resting, open, tp1, closed, stopped, expired or cancelled.
 """
 from __future__ import annotations
@@ -558,7 +559,7 @@ def score_state(path: str) -> None:
 
 # ---------- brief ----------
 TD = '<td style="border:1px solid #c5cdd6;white-space:nowrap{}">{}</td>'
-TH = '<th style="background:#e4e9ef;border:1px solid #c5cdd6;text-align:left">{}</th>'
+TH = '<th bgcolor="#e4e9ef" style="background-color:#e4e9ef;border:1px solid #c5cdd6;text-align:left">{}</th>'  # the mail tool strips "background:"
 
 
 def _table(head: list[str], rows: list[list]) -> str:
