@@ -10,7 +10,7 @@ Usage:
   python engine.py verdict state.csv "K1=TAKE:reason" "K2=PASS:reason"   log judged candidates from the last scan
   python engine.py html brief.json                  the brief as HTML (brief.html) and plain text (brief.txt)
 State CSV columns: id,run,sym,side,verdict,setup,entry,stop,tp1,tp2,valid_until,status,filled_at,closed_at,R,live,note
-  side long or short; verdict TAKE, PASS or COLE; status resting, open, tp1, closed, stopped, expired or cancelled.
+  side long or short; verdict TAKE, PASS or OWN; status resting, open, tp1, closed, stopped, expired or cancelled.
 """
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ GROUPS = {"alt beta": {"NEAR", "INJ", "RUNE", "LINK", "SOL", "XRP", "LTC"}, "AI"
           "BTC": {"BTC", "MSTR", "COIN"}}
 MAKER, TAKER, FEE_RT = 0.0002, 0.0006, 0.08  # FEE_RT in percent, maker entry and exit
 RISK, LEV_CAP, MARGIN_HIT = 0.05, 80, 55.0
-FLOOR = 1.6  # Cole, 25 Sep 2026: 1.6:1 net or better to TP A; TP B reaches for the bigger dated move
+FLOOR = 1.6  # owner, 25 Sep 2026: 1.6:1 net or better to TP A; TP B reaches for the bigger dated move
 EDGES_SINCE = "2026-09-28"
 TREND_N = (5, 10, 20, 30, 60, 90, 150, 250, 360)
 STOP_BEYOND_ATR = 1.0  # journal entry 44
@@ -388,7 +388,7 @@ def score_row(r: pd.Series) -> dict:
     except (TypeError, ValueError):
         return out
     if not (np.isfinite(entry) and np.isfinite(stop)) or entry == stop:
-        return out  # no ticket levels (for example Cole's own position): reported, not scored
+        return out  # no ticket levels (for example the owner's own position): reported, not scored
     tp1 = float(r.tp1) if not pd.isna(r.tp1) else np.nan; tp2 = float(r.tp2) if not pd.isna(r.tp2) else tp1
     tp1 = tp2 if np.isnan(tp1) else tp1; risk = abs(entry - stop)
     stop_entry = "bracket" in str(r.setup)
@@ -467,7 +467,7 @@ def record(S: pd.DataFrame) -> list[str]:
     lines.append(f"PASS rows (paper only): {pn} resolved" + (f", mean {psum / pn:+.2f}R" if pn else ""))
     if n and pn:
         lines.append(f"Evaluator edge, TAKE minus PASS: {sumR / n - psum / pn:+.2f}R" + (" (indicative below 30 each)" if min(n, pn) < 30 else ""))
-    lv = done[done.live.astype(str).str.lower().isin(["y", "yes"])]; L = _agg(S, "TAKE", True); C = _agg(S, "COLE", True)
+    lv = done[done.live.astype(str).str.lower().isin(["y", "yes"])]; L = _agg(S, "TAKE", True); C = _agg(S, "OWN", True)
     ln = len(lv) + L["n"] + C["n"]; lsum = lv.R.sum() + L["sumR"] + C["sumR"]
     if ln:
         lines.append(f"Live (confirmed fills): {ln} resolved, net {lsum:+.2f}R, mean {lsum / ln:+.2f}R")
@@ -518,8 +518,8 @@ def score_state(path: str) -> None:
     changed = N[(N.status != S.status)]
     for _, r in changed.iterrows():
         print(f"  CHANGED {r.id} {r.sym} {r.side}: {S.loc[_, 'status']} -> {r.status}{'' if pd.isna(r.R) else f' ({r.R}R)'}")
-    open_risk = len(N[N.status.isin(["open", "tp1"]) & N.verdict.isin(["TAKE", "COLE"])]) * RISK * 100
-    print(f"Open risk on filled TAKE and COLE rows: about {open_risk:.0f}% of equity (5% a row) against the 40% cap")
+    open_risk = len(N[N.status.isin(["open", "tp1"]) & N.verdict.isin(["TAKE", "OWN"])]) * RISK * 100
+    print(f"Open risk on filled TAKE and OWN rows: about {open_risk:.0f}% of equity (5% a row) against the 40% cap")
     print("\n".join(record(N)))
 
 

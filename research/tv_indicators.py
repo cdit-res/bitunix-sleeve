@@ -1,4 +1,4 @@
-"""Cole's TradingView tools rebuilt in Python, pre-registered 25 Sep 2026 before running.
+"""The owner's TradingView tools rebuilt in Python, pre-registered 25 Sep 2026 before running.
 
 H: Harmonic XABCD patterns (the LonesomeTheBlue script is closed source, so this uses the standard ratio table in
    indicators_spec.md). ZigZag from confirmed pivots, period P = 8 bars each side, so a pivot is known P bars late.

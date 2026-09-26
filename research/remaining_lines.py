@@ -1,6 +1,6 @@
 """Remaining lines, pre-registered 25 Sep 2026 before running. Each is one hypothesis family; every variant counted.
 
-TS: trend ensemble short side (Cole: shorts with Donchian worked for him). Mirror of trend_ensemble.py T1 with the
+TS: trend ensemble short side (owner request: shorts with Donchian worked for him). Mirror of trend_ensemble.py T1 with the
     0.5% stop rail: short on a daily close at or below the lowest of the prior N closes (N = 5 ... 360), stop at the
     midpoint of the N-day closing range trailed down daily, never raised; exit when a 4h high reaches the stop.
     Funding counted as zero for shorts (they usually receive it). Sets as T1.

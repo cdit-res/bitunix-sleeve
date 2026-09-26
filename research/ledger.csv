@@ -1,0 +1,84 @@
+id,date,family,hypothesis,instruments,timeframe,hold,design,held_out,fresh,verdict,script,notes
+S01,2026-09-24,chart structure,"Pullback, failed move and bracket structures, mechanical",20 pairs 2022-23; BTC 2017-26,4h,to 3R or stop,"about 0R (-0.06R, n=1219)",+0.01R (n=1425),n/a,fail,"bt.py, edge.py",Stops under 0.5% lose about 0.66R a trade
+S02,2026-09-24,regime,Pullback in low volatility boost,BTC,4h,to 3R,-0.13R (n=160) 2019-22,+0.02R (n=172) 2023-26,n/a,fail,regime.py,Boost dropped from the prompts
+S03,2026-09-24,intraday BTC,"Eight intraday tests: US-session momentum, fading and breaking stretched levels, Asia-range sweep, funding windows, hour of day, weekly alt momentum",BTC 1m 2017-26,1m to 1h,intraday,-0.04R to -0.42R,none positive in both halves,n/a,fail,"(session scripts, 24 Sep)",Costs of 0.04% to 0.14% against stops near 0.8%
+S04,2026-09-24,trend,"BTC time-series momentum, 14 and 28-day blend, 40% volatility target",BTC 2013-26,daily,weeks,"Sharpe 2.91, 1.20, 1.43, 1.04 by period",positive every period,n/a,positive (parked at the owner's call),"(session, 24 Sep)","Long-only Sharpe about 1.29, max drawdown 31%"
+S05,2026-09-25,weekend,Weekend gap continuation (Friday CME close to Sunday open),BTC; alts,1h,to 3R,+0.17R (BTC 2022-23),"+0.22R (BTC, n=38); alts negative",n/a,retired,gap.py,"CME trades 24/7 since 29 May 2026, so the gap no longer forms"
+S06,2026-09-25,levels,"the owner's method: tested support or trendline, stop 0.25 ATR beyond, re-enter at next support","BTC, ETH, SOL, XRP","4h levels, 1h execution","to 3R, 240h","longs -0.26R (t -5.2), shorts -0.41R (t -8.6)","longs -0.45R, shorts -0.21R",n/a,fail,support.py,Re-entries worse than first entries
+S07,2026-09-25,levels,"Same levels, stop 1.0 ATR beyond (F2) or entry at the sweep (F3)","BTC, ETH, SOL, XRP",4h / 1h,to 3R,"F2 longs -0.07R, shorts -0.18R","F2 longs -0.22R, shorts +0.09R",n/a,fail,support_variants.py,Wide stops cut the loss by about 0.2R; stop buffer rule kept
+S08,2026-09-25,levels,G: level entries only in the direction of the 14/28-day trend,"BTC, ETH, SOL, XRP",4h,to 3R,aligned -0.095R vs all -0.092R,no gain,n/a,fail,loop1.py,
+S09,2026-09-25,reversal,C: capitulation (2.5 sigma daily move) buy early / after confirmation; blow-off short,"BTC, ETH, SOL, XRP","daily, 1h execution",10 days,early longs -0.11R; confirm about 0R,early longs -0.52R (t -2.9); shorts negative,n/a,fail,loop1.py,
+S10,2026-09-25,volatility,N: NR7 daily bracket,"BTC, ETH, SOL, XRP; then 10 majors","daily, 4h execution",3 days,"+0.08R (t 2.8), halves +0.24R then -0.03R",-0.03R,n/a,fail,"loop1.py, nr7_broad.py",Decayed after 2020
+R01,2026-09-25,range,"Range fade (grid) at tested 1h range edges, target mid","BTC 5m exec; ETH, SOL, XRP 1h",1h,48h,-0.43R (t -7.6),-0.38R,-0.26R (t -6.5),fail,range_grid.py,Wins 21.7% vs about 28% for a random walk: edges break more often than chance
+R02,2026-09-25,range,"Range fade, target far edge",as R01,1h,48h,-0.52R,-0.45R,n/a,fail,range_grid.py,
+R03,2026-09-25,range,"Range break, stop just inside",as R01 + six fresh,1h,"to 3R, 48h",-1.11R,-1.04R,-1.25R,fail,range_break.py,Breaks rarely follow through
+R04,2026-09-25,range,"Range break, stop at range mid",as R03,1h,"to 3R, 48h",+0.01R,-0.01R,-0.06R,fail,range_break.py,
+F01,2026-09-25,funding,Fade funding extremes (top/bottom 5% of 90 days),"BTC, ETH 2020-23; 8 coins 2025-26","8h funding, 4h execution",5 days,-0.01R (t -0.1),-0.12R,n/a,fail,funding_extremes.py,"Literature: funding is a one-month crash-risk state, not a short-term signal"
+T01,2026-09-25,trend,"Multi-horizon trend ensemble, long only (5 to 360-day closing highs, trailing midpoint stop)","BTC, ETH, SOL, XRP; six fresh","daily, 4h execution","median 3.3 days, tail to months",Sharpe 1.53 (t 5.3); +1.27R a trade (t 8.9),Sharpe 1.49 (t 2.5),Sharpe 1.18 (t 3.5),"PASS (daily, not intraday)",trend_ensemble.py,Passes with the 0.5% stop rail; first run failed fresh on one DOT trade with a near-zero stop
+T02,2026-09-25,trend,"Trend ensemble, exit on daily close below stop",as T01,daily,median 6 days,Sharpe 0.50 (t 1.7),Sharpe 0.92,Sharpe 0.76,fail,trend_ensemble.py,Design t below 3
+T03,2026-09-25,continuation,"MAX-10: long the morning after a 10-day closing high, 1 ATR stop, exit next morning",as T01,"daily, 4h execution",24h rolling,"+0.11R (t 4.7); halves +0.23R, +0.06R",+0.08R (t 2.4),+0.06R (t 2.8),"PASS (24h hold, not intraday)","trend_ensemble.py, max10_checks.py","Holds at lookbacks 5 to 30, taker entry, 12 of 15 years; pooled out-of-sample t 3.5"
+T04,2026-09-25,reversal,MIN-10: buy a 10-day closing low,as T01,daily,24h,-0.01R,-0.02R,+0.01R,fail,trend_ensemble.py,
+T05,2026-09-25,continuation,SHORT-10: sell a 10-day closing low,as T01,daily,24h,-0.02R,0.00R,-0.03R (t -2.2),fail,max10_checks.py,Shorts do not pay
+T06,2026-09-25,trend,"Trend ensemble with three lookbacks (20, 60, 150) for manual use",as T01,daily,median 10 days,+2.10R (t 4.6); Sharpe 1.03,+0.94R (t 1.9); Sharpe 1.00,+0.90R (t 4.7),supports T01,trend_subset.py,Robustness variant
+H01,2026-09-25,harmonic,"Harmonic XABCD (Gartley, Bat, Alt Bat, Butterfly, Crab, Deep Crab), PRZ limit, ZigZag 8","BTC, ETH, SOL, XRP; six fresh",1h,"5 days, split targets",-0.14R (t -1.9),-0.12R,-0.12R,fail,tv_indicators.py,LonesomeTheBlue script is closed source; standard ratios used
+H02,2026-09-25,harmonic,Harmonic XABCD,as H01,4h,5 days,-0.30R (t -2.7),-0.15R,-0.02R,fail,tv_indicators.py,
+L01,2026-09-25,trendline,"LuxAlgo Trendlines with Breaks (exact published logic), stop 1.5 ATR, 3R",as H01,1h,5 days,-0.13R (t -2.4),-0.12R,-0.06R,fail,tv_indicators.py,
+L02,2026-09-25,trendline,LuxAlgo trendline breaks,as H01,4h,5 days,"+0.13R (t 2.4); halves +0.41R, -0.03R",-0.03R,+0.11R (t 3.0),fail,tv_indicators.py,Longs +0.15R: the long-trend effect again
+R05,2026-09-25,range,"Range deviation reclaim (sweep, close back inside), target mid",as R03,"1h signal, 5m BTC",48h,-0.29R (t -3.9),-0.39R,-0.28R,fail,range_deviation.py,BTC on 5m -0.58R
+R06,2026-09-25,range,"Range deviation reclaim, target far edge",as R03,1h,48h,-0.41R,-0.36R,-0.34R,fail,range_deviation.py,
+R07,2026-09-25,range,"Deviation reclaim, only with the 14/28-day trend",as R03,1h,48h,-0.46R,-0.32R,-0.26R,fail,range_deviation.py,
+R08,2026-09-25,range,"Range fade, only with the 14/28-day trend",as R03,1h,48h,-0.43R,-0.45R,-0.21R,fail,range_deviation.py,
+T07,2026-09-25,trend,Trend ensemble shorts (Donchian mirror),as T01,daily,days,"+0.15R (t 2.2); halves -0.09R, +0.21R",-0.08R,+0.09R,fail,remaining_lines.py,Paid in 2018 (+1.35R) and 2022 (+0.30R) only
+T08,2026-09-25,trend,Trend shorts only while BTC's market trend is down,as T01,daily,days,"+0.45R (t 3.7); halves +0.22R, +0.48R",-0.11R,+0.12R (t 2.6),fail,orb.py,Held-out negative
+E01,2026-09-25,macro,"CPI and FOMC bracket at the release, 0.25% legs, stop at the reference, 3R","BTC 5m, 2017-26",5m,2h,-0.75R (t -5.2),-0.65R,n/a,fail,remaining_lines.py,Whipsaw at releases
+E02,2026-09-25,macro,"CPI and FOMC bracket, 0.5% legs",as E01,5m,2h,-0.45R,-0.31R,n/a,fail,remaining_lines.py,
+X01,2026-09-25,reversal,Liquidation-spike fade (6 sigma 5m bar),BTC 5m 2016-26,5m,2h,-0.67R (t -15),-1.12R,n/a,fail,remaining_lines.py,Median stop 0.29%: costs dominate and spikes continue
+X02,2026-09-25,lead-lag,BTC to alt lead-lag after a 2 sigma BTC 15m move,9 alts 15m 2025-26,15m,15m and 1h,-0.15% a trade,-0.16%,n/a,fail,remaining_lines.py,Gross about zero
+O01,2026-09-25,opening range,"ORB-5 at the US open (first 5m candle direction), 10R or close",BTC 5m 2016-26,5m,to 16:00 ET,-0.32R (t -3.7),-0.34R,n/a,fail,orb.py,
+O02,2026-09-25,opening range,ORB-15 at the US open,BTC; 9 alts 15m,15m,to 16:00 ET,-0.21R (t -2.9),-0.28R,-0.16R (alts),fail,orb.py,
+V01,2026-09-25,volatility breakout,"Williams volatility breakout long (open + 0.5 x prior range), stop at the open, exit at day end",BTC 5m; 9 alts 1h,intraday,to day end,"+0.01R; halves +0.33R, -0.09R",-0.05R,-0.20R (t -10.9),fail,vb_pairs.py,
+V02,2026-09-25,volatility breakout,Williams volatility breakout short,as V01,intraday,to day end,-0.15R,-0.12R,-0.20R,fail,vb_pairs.py,
+P01,2026-09-25,pairs,Pair MAX-10 on the ratio to BTC (long/short),"ETH, SOL, XRP vs BTC; six fresh",daily,24h,+0.02R (t 2.6),0.00R,+0.01R,fail,vb_pairs.py,No cross-sectional edge
+T09,2026-09-25,continuation,MAX-10 as a same-day trade (08:00 to 21:00 UTC),as T01 (1h),1h,13h,-0.01R,+0.04R,-0.02R,fail,max10_intraday.py,MAX-10's edge accrues outside 08:00 to 21:00 UTC
+T10,2026-09-25,continuation,MAX-10 with a pullback limit entry (open - 0.25 ATR),as T09,1h,24h,0.00R,0.00R,+0.01R,fail,max10_intraday.py,
+K01,2026-09-25,stocks intraday,ORB-5 at the US open,"TQQQ, SPXL, SOXL 5m 2020-26; 2x single-stock ETFs fresh",5m,to 16:00,-0.55R (t -8.1),-0.59R,-0.15R,fail,stocks_intraday.py,Costs at Bitunix stock-perp rates
+K02,2026-09-25,stocks intraday,ORB-15 at the US open,as K01,15m,to 16:00,-0.32R,-0.33R,-0.10R,fail,stocks_intraday.py,
+K03,2026-09-25,stocks intraday,Intraday momentum: prior close to 10:00 sets 15:30 to 16:00 side,as K01,5m,30 min,-0.20% a trade (t -18.6),-0.21%,-0.20%,fail,stocks_intraday.py,Gross about zero; costs 0.18%
+K04,2026-09-25,stocks overnight,Overnight drift: long 16:00 to 09:30,as K01,daily,overnight,-0.08% a night,+0.04%,0.00%,fail,stocks_intraday.py,
+K05,2026-09-25,stocks daily,MAX-10 on stocks,as K01,daily,24h,+0.04R (t 1.3),-0.04R,+0.06R,fail,stocks_intraday.py,Short history
+K06,2026-09-25,stocks daily,Trend ensemble long on stocks,as K01,daily,days,+0.17R (t 2.1),-0.16R (t -2.9),+0.06R,fail,stocks_intraday.py,
+K07,2026-09-25,stocks daily,Trend ensemble short on stocks,as K01,daily,days,-0.29R (t -5.4),-0.32R,-0.26R,fail,stocks_intraday.py,
+W01,2026-09-25,window,"MAX-10 state traded inside the morning window (08:00 to 19:00 UTC), stop 0.25 daily ATR, 2R","BTC, ETH, SOL, XRP; six fresh coins",1h,11h,-0.087R (t -2.0),+0.057R,-0.071R,fail,batch3a.py,"Median stop 1.44% (about 38x); control, all window longs, -0.07R to -0.13R"
+W02,2026-09-25,window,MAX-10 state inside the evening window (19:00 to 08:00 UTC),as W01,1h,13h,-0.088R (t -2.1),-0.117R,-0.093R,fail,batch3a.py,
+W03,2026-09-25,window,"Five or more trend components long, morning window",as W01,1h,11h,-0.009R (t -0.3),-0.016R,-0.077R,fail,batch3a.py,
+W04,2026-09-25,window,"Five or more trend components long, evening window",as W01,1h,13h,-0.086R (t -2.5),-0.084R,-0.046R,fail,batch3a.py,The daily edges do not survive a tight intraday stop
+B01,2026-09-25,disproof,"T01 and T03 robustness: walk-forward lookback, BTC regime, double costs, years",as T01,daily,as tested,MAX-10 walk-forward +0.088R (t 4.4),double costs +0.071R (t 2.0),double costs +0.047R (t 2.3),supports T03,batch3a.py,"MAX-10 by BTC trend: up +0.103R, flat +0.048R, down -0.006R. T01 Sharpe positive every year but 2018 (-0.16)"
+C1a,2026-09-25,macro,"Pre-FOMC drift, 14:00 the day before to 13:55 on the day (Lucca and Moench)","SPXL, TQQQ 5m 2020-26",5m,24h,+0.41% an event (t 2.5),+0.05% (t 0.3),n/a,fail,batch3b.py,
+C1b,2026-09-25,macro,Pre-FOMC drift on BTC,BTC Bitstamp 5m 2017-26,5m,24h,+0.51% (t 0.9),-0.15%,n/a,fail,batch3b.py,
+C2a,2026-09-25,reversal,RSI-2 dips in uptrends (Connors) on leveraged ETF proxies,"TQQQ, SPXL, SOXL; 14 fresh ETFs, 2020-26",daily,up to 10 days,-0.009R (t -0.1),+0.258R (t 2.5),+0.066R,fail,batch3b.py,Short history; retested on 33 years as SC6
+C2b,2026-09-25,reversal,RSI-2 dips in uptrends on crypto,"BTC, ETH, SOL, XRP; six fresh",daily,up to 10 days,-0.002R,-0.054R,-0.003R,fail,batch3b.py,
+C5,2026-09-25,stocks daily,K05 and K06 repeated with nine more fresh ETFs,17 leveraged ETFs,daily,days,MAX-10 +0.039R (t 1.3); trend +0.165R (t 2.1),-0.039R; -0.162R,-0.033R; -0.032R,fail,batch3b.py,Not new variants
+SC1,2026-09-25,stock CFD,"Turn of the month on index ETFs, last day to third day","SPY, QQQ 1993-2026; 12 fresh ETFs",daily,4 days,+0.026R (t 0.9),+0.019R,+0.013R,fail,stocks_cfd.py,Beats other days (-0.056R) but not costs
+SC2a,2026-09-25,stock CFD,Short UVXY while VIX/VIX3M < 0.95 (volatility carry),UVXY 2011-26,daily,to 20 days,+0.194R (t 2.1),+0.090R (t 1.0),n/a,"fail (positive, under t 3)",stocks_cfd.py,10 of 13 years positive; gap-aware stops
+SC2b,2026-09-25,stock CFD,Short UVXY while VIX/VIX3M < 0.90,as SC2a,daily,to 20 days,+0.207R (t 2.1),+0.091R,n/a,fail,stocks_cfd.py,
+SC3,2026-09-25,stock CFD,Trend ensemble long on single stocks (T01 rules),"39 design, 53 fresh stocks from the Bitunix list",daily,weeks,+0.178R (t 9.2),+0.256R (t 5.3),+0.453R (t 6.1),reject (survivorship),stocks_cfd.py,"Random entry days did better (+0.29R, +0.53R, +0.78R): today's Bitunix list is a list of winners"
+SC4,2026-09-25,stock CFD,MAX-10 on single stocks,as SC3,daily,24h,-0.005R (t -1.5),-0.010R,+0.002R,fail,stocks_cfd.py,MAX-10 is crypto-specific
+SC5a,2026-09-25,stock CFD,"Weekly short-term reversal, long 3 losers and short 3 winners",as SC3,weekly,1 week,-0.007R,-0.046R (t -3.2),-0.040R,fail,stocks_cfd.py,
+SC5b,2026-09-25,stock CFD,Weekly reversal only when VIX >= 20 (Nagel),as SC3,weekly,1 week,-0.009R,-0.060R,-0.029R,fail,stocks_cfd.py,
+SC6,2026-09-26,stock CFD,RSI-2 dips in uptrends on index ETFs (33 years),"SPY, QQQ; 12 fresh ETFs",daily,about 4 days,+0.152R (t 3.4) at Bitunix funding,+0.138R (t 2.1),+0.042R (t 2.4),conditional (watch),stocks_cfd.py,"Beats random uptrend days by +0.16R, +0.16R, +0.07R (t 3.5, 2.3, 3.6); fails at 0.03%/day funding and at double fees (fresh -0.009R)"
+SC7,2026-09-25,stock CFD,Index limit dip: buy limit at close - 0.5 ATR in uptrends,as SC6,daily,1 to 2 days,-0.141R (t -6.6),-0.100R,-0.103R,fail,stocks_cfd.py,
+SC8a,2026-09-25,stock CFD,"Event-gap continuation, longs (post-announcement drift)",as SC3,daily,10 days,+0.022R (t 0.2),+0.166R,+0.097R,fail,stocks_cfd.py,Random days with the same stop did as well
+SC8b,2026-09-25,stock CFD,"Event-gap continuation, both sides",as SC3,daily,10 days,-0.011R,+0.033R,+0.057R,fail,stocks_cfd.py,
+SC9a,2026-09-26,stock CFD,"Trend ensemble long on index, sector, country and metal ETFs","SPY, QQQ, GLD, SLV; 14 fresh ETFs",daily,median 26 days,+0.245R (t 3.7) at Bitunix funding,+0.532R (t 4.2),+0.139R (t 5.2),"beta, not an entry edge",batch5_etf.py,"Passes the gate and double fees, fails at 0.03%/day funding; random entry days with the same exit did better, so the return is drift plus the trailing exit"
+SC9b,2026-09-25,stock CFD,Trend ensemble long and short on ETFs,as SC9a,daily,weeks,-0.122R (t -3.2),0.000R,-0.124R,fail,batch5_etf.py,Shorts alone -0.24R
+K08,2026-09-25,stock CFD,"Overnight drift after a down session (Boyarchenko, Larsen and Whelan)",as SC9a,daily,overnight,-0.069R (t -9.3),-0.066R,-0.047R,fail,batch5_etf.py,Mean overnight move +0.058% against 0.14% costs
+N1a,2026-09-25,order flow,"Taker buy share (24h) in the top or bottom fifth, follow it for the window, stop 0.25 ATR","10 coins, Binance 1h 2022-26",1h,window,-0.069R (t -2.7),-0.034R,-0.049R,fail,batch4_crypto.py,
+N1b,2026-09-25,order flow,"As N1a, stop 0.5 ATR",as N1a,1h,window,-0.019R,+0.001R,-0.026R,fail,batch4_crypto.py,
+N1c,2026-09-25,order flow,"As N1a, reversed (exhaustion)",as N1a,1h,window,-0.099R (t -3.9),-0.120R,-0.078R,fail,batch4_crypto.py,
+N2,2026-09-25,levels,Round-number fade (Osler): resting limits at the nearest round levels,BTC 5m 2016-26; nine coins 1h,5m and 1h,window,-0.066R (t -5.8),-0.076R,-0.044R,fail,batch4_crypto.py,Half-step control -0.044R: round numbers break more often than they hold
+N4,2026-09-25,breakout,"Asia-range bracket at the 08:30 run, stop at the range midpoint",as N2,5m and 1h,to 19:00 UTC,-0.232R (t -13.7),-0.296R,-0.365R,fail,batch4_crypto.py,
+N5,2026-09-25,reversal,"Turtle soup (Raschke and Connors), both sides",as T01,daily,3 days,-0.169R (t -3.2),-0.129R,-0.098R,fail,batch4_crypto.py,
+C3,2026-09-25,improvement,MAX-10 skipping signals when funding is in its top fifth,"BTC, ETH",daily,24h,+0.119R vs +0.084R (2020-23),+0.071R vs +0.066R (Aug 2025 on),n/a,not adopted,batch4_crypto.py,Small and thin
+C4,2026-09-25,improvement,T01 trades weighted by inverse volatility,as T01,daily,weeks,Sharpe 1.40 vs 1.50,2.03 vs 1.87,1.31 vs 1.30,not adopted,batch4_crypto.py,Mixed
+PL1,2026-09-26,placebo,T01 against random entry days with the same trailing exit,as T01,daily,weeks,-0.08R (t -0.5),+0.42R (t 2.2),-0.21R (t -1.9),T01 is beta with a trailing exit,placebo_crypto.py,The expectancy comes from crypto's drift and letting winners run; the breakout entry adds nothing reliable
+PL2,2026-09-26,placebo,MAX-10 against a long every day with the same stop and hold,as T03,daily,24h,+0.093R (t 3.8),+0.093R (t 2.5),+0.057R (t 2.7),T03 is a genuine entry edge,placebo_crypto.py,The only signal that beats its placebo in every set

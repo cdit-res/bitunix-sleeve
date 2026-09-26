@@ -1,5 +1,5 @@
 """Robustness variant (counted): the trend ensemble with three lookbacks (20, 60, 150) instead of nine, the version
-Cole could run by hand. Same rules, rail, data and sets as trend_ensemble.py with MIN_STOP=0.005."""
+The owner could run by hand. Same rules, rail, data and sets as trend_ensemble.py with MIN_STOP=0.005."""
 import os
 os.environ.setdefault("MIN_STOP", "0.005")
 import numpy as np, pandas as pd

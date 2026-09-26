@@ -1,4 +1,4 @@
-"""MAX-10 as a day trade, two variants pre-registered 25 Sep 2026 before running (Cole: day trading on 15m).
+"""MAX-10 as a day trade, two variants pre-registered 25 Sep 2026 before running (owner request: day trading on 15m).
 D1: on a MAX-10 signal, long at the 08:00 UTC open (maker), stop 1.0 daily ATR, exit at 21:00 UTC the same day
     (US close area) at market. No rolling; each signal day is one day trade.
 D2: on a MAX-10 signal, a maker limit at the 08:00 UTC open minus 0.25 daily ATR (a 15m pullback entry), valid until

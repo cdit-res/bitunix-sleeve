@@ -1,4 +1,4 @@
-"""15-minute day trading, pre-registered 25 Sep 2026 before running (Cole: day trading on the 15m chart).
+"""15-minute day trading, pre-registered 25 Sep 2026 before running (owner request: day trading on the 15m chart).
 
 ORB: opening-range breakout at the US cash open (09:30 New York), after Zarattini and Aziz (2023), who found the
   first 5-minute candle's direction profitable for QQQ day trades. Crypto's busiest flows since the spot ETFs sit in

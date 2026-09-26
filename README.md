@@ -4,23 +4,27 @@ Engine for the scheduled trade runs, and the research behind its rules.
 
 ## engine.py
 
-Data comes from the public static-klines repo (Binance spot, 10 majors) through raw GitHub files. A run fetches it with:
+Reads the repo's own data feed (the `data` branch, below) and falls back to static-klines for crypto if the feed is missing. A run:
 
 ```
 curl -sSLO https://raw.githubusercontent.com/cdit-res/bitunix-sleeve/main/engine.py
-python engine.py regime
+python engine.py score state.csv
+python engine.py scan
+python engine.py verdict state.csv "K1=TAKE:reason" "K2=PASS:reason"
+python engine.py html brief.json
 ```
 
 | Command | Output |
 |---|---|
-| `python engine.py regime` | Market trend (BTC daily close against EMA50 and its five-day slope) and each coin's volatility state |
-| `python engine.py levels` | Tested supports and resistances (2+ pivot touches within 0.5 ATR over 120 4h bars, unbroken on closes) and the latest trendline, with the stop 1.0 ATR beyond |
-| `python engine.py candidates` | Pullback, failed-move and bracket candidates on 4h bars, with flags |
-| `python engine.py edges` | The two tested edges: MAX-10 action per coin, and each trend component's state and trailing stop |
-| `python engine.py gap` | Retired: CME bitcoin futures trade 24/7 since 29 May 2026 |
-| `python engine.py score tickets.csv` | Scores split tickets on 15m bars, taking the stop first when one bar spans both stop and target |
+| `scan [--equity 170] [--crypto-only]` | Regime, prices, the tested edges today, and the ten nearest eligible candidates (crypto on 4h, stocks on daily) with the full ticket: entry, stop, TP A (nearest dated level at 1.6:1 net or better), TP B (farthest dated level within 4 daily ATR), leverage and margin |
+| `score state.csv` | Rescores every open row on 15m (crypto) or 1h (stocks) bars: fills, TP A, runner to breakeven, TP B, stop, expiry; prints the book, the paper record, the evaluator split (TAKE minus PASS) and live results; rolls rows resolved over three days ago into aggregates |
+| `verdict state.csv ...` | Logs the run's TAKE and PASS verdicts on the scan's candidates and prints the ticket rows |
+| `edges` | MAX-10 and trend components per coin, and their paper record since 28 September 2026 |
+| `html brief.json` | The brief as phone-width HTML tables and plain text |
 
-Symbols default to BTC, ETH, SOL, XRP and LINK; pass others as a comma list, e.g. `python engine.py levels BTCUSDT,ETHUSDT`. Covered: BTC, ETH, SOL, XRP, LINK, BNB, ADA, DOGE, AVAX, DOT. Guaranteed stops exist only on BTC, ETH, SOL and XRP.
+## data_feed/ and the `data` branch
+
+A GitHub Actions job (`.github/workflows/data.yml`) fetches public data every ten minutes, when GitHub runs it, and publishes to the `data` branch: Binance spot 15m, 1h, 4h and daily bars with taker volume for 18 coins; Yahoo 1h and daily bars for 24 stock perp underlyings and VIX; and, daily, Yahoo history since listing for 147 stocks, ETFs, indices and commodities (research). Never the Bitunix API.
 
 ## research/
 
@@ -48,9 +52,16 @@ Each script's header records its settings, fixed before it was run.
 | vb_pairs.py | Larry Williams volatility breakout (long, short); pair MAX-10 against BTC | Fail |
 | max10_intraday.py | MAX-10 as a same-day trade, and with a pullback entry | About 0R: the edge accrues outside 08:00 to 21:00 UTC |
 | stocks_intraday.py | US stocks on 5m bars (TQQQ, SPXL, SOXL and 2x single-stock ETFs as proxies, 2020-26): ORB-5, ORB-15, intraday momentum, overnight drift, MAX-10, trend long and short | Fail at Bitunix stock-perp costs: ORB-5 -0.55R, intraday momentum -0.20% a trade, trend shorts -0.29R |
+| harness.py | The standard table: strategy, asset, period, trades, gross, costs, net, max DD, Sharpe, OOS, walk-forward | Written to results_table.csv |
+| batch3a.py | The daily edges traded inside the ticket windows; disproof of MAX-10 and T1 | Windows fail (-0.01R to -0.09R); MAX-10 holds walk-forward and at double costs |
+| batch3b.py | Pre-FOMC drift; RSI-2 dips; stock MAX-10 and trend with more ETFs | Fail |
+| stocks_cfd.py | Stock CFDs on 33 years of daily data: turn of the month, short UVXY carry, trend and MAX-10 on single stocks, weekly reversal, RSI-2 and limit dips on indices, event gaps | RSI-2 index dips conditional; short UVXY positive but t 2.1; single-stock longs reflect survivorship |
+| batch5_etf.py | Trend on index, sector, country and metal ETFs; overnight drift after down days | ETF trend passes at Bitunix funding but random entries match it (beta) |
+| batch4_crypto.py | Taker-flow persistence, round-number fades, Asia-range bracket, turtle soup, funding filter, volatility scaling | Fail; improvements not adopted |
+| placebo_crypto.py | The passing crypto edges against random or unconditional entries with the same exit | MAX-10 beats its placebo in every set; the trend ensemble does not |
 | fetch_data.py | Rebuilds `data/` from the public sources | |
 
-Rules for any change: net of fees, t of 3 or more, the same sign in both halves, and a held-out period run once. Count every variant tried.
+Rules for any change: net of fees, t of 3 or more, the same sign in both halves, a held-out period run once, fresh symbols, and a placebo the signal must beat. Count every variant tried. The full record is research/LEDGER.md and research/PROGRAMME.md.
 
 Held-out rules: BTC, ETH, SOL and XRP after 2023 (or 2024 for 1h alt tests) are the time held-out; LINK, BNB, ADA, DOGE, AVAX and DOT are fresh coins never used to design a rule.
 

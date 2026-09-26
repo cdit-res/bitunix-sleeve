@@ -1,4 +1,4 @@
-"""US stock day-trading tests on 5-minute bars, pre-registered 25 Sep 2026 before running (Cole: what about stocks).
+"""US stock day-trading tests on 5-minute bars, pre-registered 25 Sep 2026 before running (owner request: what about stocks).
 
 Data: github.com/piekstra/market-data, 5-minute candles for leveraged ETFs, used as intraday proxies for the Bitunix
 stock perps: TQQQ (3 x QQQ), SPXL (3 x SPY), SOXL (3 x semiconductors), NVDX (2 x NVDA), TSLT (2 x TSLA),
