@@ -51,7 +51,7 @@ See LEDGER.md (83 entries) and results_table.csv (the standard evaluation table)
 | SC6 RSI-2 dips (index ETFs) | Close above SMA200 and RSI(2) under 10; exit above SMA5 or at 10 days | Conditional: passes at Bitunix funding (0.0035% an interval), beats its placebo in every set, fails at double fees. Watch list |
 | T01 trend ensemble (crypto) | Nine Donchian lookbacks, trailing midpoint stop | Positive, but random entry days with the same exit do as well: crypto drift plus the exit, not the entry. Paper as beta |
 | SC9a trend ensemble (ETFs) | The same on index, sector, country and metal ETFs | Positive at Bitunix funding, same finding as T01: drift plus exit |
-| Everything intraday | Every construction in the ledger with a hold of one window or less | None passes: at stops of 0.7% to 0.9% costs are 0.1R to 0.2R a trade and no signal has that much gross edge |
+| Everything intraday | Every construction in the ledger with a hold of one window or less | None passes: at stops of 0.7% to 0.9% costs run at roughly 0.05R to 0.15R a trade and no signal has that much gross edge |
 
 Why intraday fails, in one line: with a stop of b, a drift edge is worth about b times mu over sigma squared in R, so at b = 0.75% the conditional drift would need a daily Sharpe near 0.6 (an annualised 11) just to cover fees. Nothing on public OHLC, taker volume, funding or the macro calendar comes close.
 
