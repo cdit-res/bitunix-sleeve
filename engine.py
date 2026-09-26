@@ -4,7 +4,7 @@ Data: the repo's own feed (data branch, refreshed hourly on GitHub Actions from 
 public static-klines repo as a fallback for crypto. Never the Bitunix API.
 
 Usage:
-  python engine.py refresh                          ask the feed for fresh data and wait up to four minutes
+  python engine.py refresh                          ask the feed for fresh data and wait up to two minutes
   python engine.py scan [--equity 170] [--crypto-only]   regime, prices, tested edges, every candidate with its ticket
   python engine.py score state.csv                  rescore every open row in place; print the book and the record
   python engine.py edges                            MAX-10 and trend components today, and the paper record since 28 Sep
@@ -90,7 +90,7 @@ def manifest() -> dict:
         return {}
 
 
-def refresh(wait_s: int = 240) -> None:
+def refresh(wait_s: int = 110) -> None:
     """Ask the feed for fresh data by pushing an empty commit to the `refresh` branch, then wait for it to publish."""
     import time
     before = feed_root()
@@ -100,8 +100,8 @@ def refresh(wait_s: int = 240) -> None:
     if subprocess.run(cmd, shell=True, capture_output=True).returncode != 0:
         print(f"refresh: could not trigger the feed from here; it was last updated {manifest().get('updated_utc', 'unknown')} UTC")
         return
-    for _ in range(wait_s // 15):
-        time.sleep(15)
+    for _ in range(wait_s // 10):
+        time.sleep(10)
         feed_root.cache_clear()
         if feed_root() != before:
             manifest.cache_clear(); bars.cache_clear()
