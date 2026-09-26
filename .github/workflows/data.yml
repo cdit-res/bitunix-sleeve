@@ -2,8 +2,7 @@ name: data
 # Public market data for the runs and the research, published to the `data` branch (see data_feed/fetch.py).
 on:
   push:
-    branches: [main]
-    paths: ["data_feed/**", ".github/workflows/data.yml"]
+    branches: [main, refresh]  # a run can push an empty commit to `refresh` for fresh data on demand
   schedule:
     - cron: "*/10 * * * *"       # every ten minutes; GitHub drops many scheduled runs, so ask often
     - cron: "22 7,8 * * 1-5"     # just before the 08:30 UK run (BST, GMT)
@@ -29,7 +28,7 @@ jobs:
         run: |
           git clone -q --depth 1 --branch data "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" out || mkdir -p out
           R=""
-          if [ "${{ github.event_name }}" != "schedule" ] || [ "${{ github.event.schedule }}" = "37 22 * * 1-5" ] || [ ! -d out/research ]; then R="--research"; fi
+          if [ "${{ github.ref }}" != "refs/heads/refresh" ] && { [ "${{ github.event_name }}" != "schedule" ] || [ "${{ github.event.schedule }}" = "37 22 * * 1-5" ]; } || [ ! -d out/research ]; then R="--research"; fi
           python data_feed/fetch.py out $R
       - name: publish
         run: |

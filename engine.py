@@ -4,6 +4,7 @@ Data: the repo's own feed (data branch, refreshed hourly on GitHub Actions from 
 public static-klines repo as a fallback for crypto. Never the Bitunix API.
 
 Usage:
+  python engine.py refresh                          ask the feed for fresh data and wait up to four minutes
   python engine.py scan [--equity 170] [--crypto-only]   regime, prices, tested edges, every candidate with its ticket
   python engine.py score state.csv                  rescore every open row in place; print the book and the record
   python engine.py edges                            MAX-10 and trend components today, and the paper record since 28 Sep
@@ -67,12 +68,37 @@ def _get(url: str) -> bytes:
     raise RuntimeError(f"download failed: {url}")
 
 
+def _bust() -> str:
+    return f"?t={int(pd.Timestamp.now('UTC').timestamp())}"  # skip stale CDN copies of the feed
+
+
 @lru_cache(maxsize=1)
 def manifest() -> dict:
     try:
-        return json.loads(_get(FEED + "manifest.json"))
+        return json.loads(_get(FEED + "manifest.json" + _bust()))
     except Exception:
         return {}
+
+
+def refresh(wait_s: int = 240) -> None:
+    """Ask the feed for fresh data by pushing an empty commit to the `refresh` branch, then wait for it to publish."""
+    t0 = pd.Timestamp.now("UTC").floor("min")
+    cmd = ("rm -rf /tmp/rf && git clone -q --depth 1 https://github.com/cdit-res/bitunix-sleeve /tmp/rf && cd /tmp/rf && "
+           "git -c user.name=run -c user.email=run@users.noreply.github.com commit -q --allow-empty -m refresh && "
+           "git push -qf origin HEAD:refresh")
+    if subprocess.run(cmd, shell=True, capture_output=True).returncode != 0:
+        print(f"refresh: could not trigger the feed from here; it was last updated {manifest().get('updated_utc', 'unknown')} UTC")
+        return
+    import time
+    for _ in range(wait_s // 20):
+        time.sleep(20)
+        try:
+            m = json.loads(_get(FEED + "manifest.json" + _bust()))
+        except Exception:
+            continue
+        if pd.Timestamp(m.get("updated_utc", "2000-01-01T00:00Z")) >= t0:
+            manifest.cache_clear(); print(f"refresh: feed updated {m['updated_utc']} UTC"); return
+    print(f"refresh: no update within {wait_s} s; the feed was last updated {manifest().get('updated_utc', 'unknown')} UTC")
 
 
 def feed_age_hours() -> float:
@@ -118,12 +144,12 @@ def bars(sym: str, interval: str) -> pd.DataFrame:
     """OHLC indexed by UTC bar open. Crypto 15m, 1h, 4h, 1d; stocks 1h and 1d (US cash session)."""
     if is_crypto(sym):
         try:
-            d = pd.read_csv(io.BytesIO(_get(f"{FEED}live/crypto/{base(sym)}_{interval}.csv")), index_col=0, parse_dates=True)
+            d = pd.read_csv(io.BytesIO(_get(f"{FEED}live/crypto/{base(sym)}_{interval}.csv{_bust()}")), index_col=0, parse_dates=True)
         except Exception:
             days = {"15m": 20, "1h": 200, "4h": 400, "1d": 1600}[interval]
             d = static_klines(sym, interval, (pd.Timestamp.now("UTC") - pd.Timedelta(days=days)).strftime("%Y-%m-%d"))
     else:
-        d = pd.read_csv(io.BytesIO(_get(f"{FEED}live/stocks/{safe(sym)}_{interval}.csv")), index_col=0, parse_dates=True)
+        d = pd.read_csv(io.BytesIO(_get(f"{FEED}live/stocks/{safe(sym)}_{interval}.csv{_bust()}")), index_col=0, parse_dates=True)
     return d.astype(float)
 
 
@@ -641,7 +667,9 @@ def main(argv: list[str]) -> None:
     pd.set_option("display.width", 250); pd.set_option("display.max_columns", 30)
     cmd = argv[1] if len(argv) > 1 else "scan"
     eq = float(argv[argv.index("--equity") + 1]) if "--equity" in argv else 170.0
-    if cmd == "scan":
+    if cmd == "refresh":
+        refresh()
+    elif cmd == "scan":
         scan(eq, "--crypto-only" not in argv)
     elif cmd == "score":
         score_state(argv[2])
