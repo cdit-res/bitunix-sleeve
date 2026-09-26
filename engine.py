@@ -43,6 +43,7 @@ GROUPS = {"alt beta": {"NEAR", "INJ", "RUNE", "LINK", "SOL", "XRP", "LTC"}, "AI"
           "BTC": {"BTC", "MSTR", "COIN"}}
 MAKER, TAKER, FEE_RT = 0.0002, 0.0006, 0.08  # FEE_RT in percent, maker entry and exit
 RISK, LEV_CAP, MARGIN_HIT = 0.05, 80, 55.0
+FLOOR = 1.6  # Cole, 25 Sep 2026: 1.6:1 net or better to TP A; TP B reaches for the bigger dated move
 EDGES_SINCE = "2026-09-28"
 TREND_N = (5, 10, 20, 30, 60, 90, 150, 250, 360)
 STOP_BEYOND_ATR = 1.0  # journal entry 44
@@ -117,8 +118,6 @@ def bars(sym: str, interval: str) -> pd.DataFrame:
     """OHLC indexed by UTC bar open. Crypto 15m, 1h, 4h, 1d; stocks 1h and 1d (US cash session)."""
     if is_crypto(sym):
         try:
-            if feed_age_hours() > 3:
-                raise RuntimeError("feed stale")
             d = pd.read_csv(io.BytesIO(_get(f"{FEED}live/crypto/{base(sym)}_{interval}.csv")), index_col=0, parse_dates=True)
         except Exception:
             days = {"15m": 20, "1h": 200, "4h": 400, "1d": 1600}[interval]
@@ -209,14 +208,13 @@ def chasing(sym: str, side: int) -> bool:
 # ---------- tickets ----------
 def ticket(sym: str, side: int, entry: float, stop: float, tp2: float, equity: float, tp1: float | None = None) -> dict:
     risk = abs(entry - stop); stop_pct = risk / entry * 100
-    tp1 = tp1 if tp1 is not None and side * (tp1 - entry) >= risk else entry + side * 1.5 * risk
-    if side * (tp2 - tp1) <= 0:
-        tp1 = entry + side * 0.5 * abs(tp2 - entry)
+    if tp1 is None:
+        tp1 = entry + side * 1.5 * risk if side * (tp2 - entry) > 1.5 * risk else tp2
     lev = int(min(LEV_CAP, max(1, np.floor(MARGIN_HIT / (stop_pct + FEE_RT)))))
     notional = RISK * equity / ((stop_pct + FEE_RT) / 100); margin = notional / lev
-    net_rr = (abs(tp2 - entry) / entry * 100 - FEE_RT) / (stop_pct + FEE_RT)
-    return dict(entry=entry, stop=stop, tp1=tp1, tp2=tp2, stop_pct=round(stop_pct, 2), net_rr=round(net_rr, 2), lev=lev,
-                notional=round(notional, 1), margin=round(margin, 2))
+    net = lambda x: (abs(x - entry) / entry * 100 - FEE_RT) / (stop_pct + FEE_RT)
+    return dict(entry=entry, stop=stop, tp1=tp1, tp2=tp2, stop_pct=round(stop_pct, 2), net_rr=round(net(tp2), 2),
+                net_rr_a=round(net(tp1), 2), lev=lev, notional=round(notional, 1), margin=round(margin, 2))
 
 
 def _fmt(x: float) -> float:
@@ -253,23 +251,22 @@ def structures(sym: str, equity: float) -> list[dict]:
 
     dd = completed(bars(sym, "1d"), "1d") if is_crypto(sym) else bars(sym, "1d"); datr = float(atr(dd).iat[-1])
 
-    def add(setup: str, side: int, entry: float, stop: float, tp2: float | None, order: str, touches: int = 0) -> None:
+    def add(setup: str, side: int, entry: float, stop: float, hint: float | None, order: str, touches: int = 0) -> None:
         if abs(entry - px) > 1.5 * datr:
             return  # too far from price to fill inside the next window
-        opp = zones[-side]
-        if tp2 is None or not np.isfinite(tp2):
-            ext = (Hh[-120:].max() if side == 1 else L[-120:].min())
-            cands = sorted({z[0] for z in opp} | {ext}, key=lambda x: side * (x - entry))
-            cands = [x for x in cands if side * (x - entry) > 0]
-            ok = [x for x in cands if ticket(sym, side, entry, stop, x, equity)["net_rr"] >= 3]
-            tp2 = ok[0] if ok else (cands[-1] if cands else np.nan)  # a dated level on the chart, never a chosen distance
-        r1 = abs(entry - stop)
-        tp1 = next((z[0] for z in opp if r1 <= side * (z[0] - entry) <= 2.5 * r1 and side * (tp2 - z[0]) > 0), None)
-        if not np.isfinite(tp2) or side * (tp2 - entry) <= 0:
+        ext = Hh[-120:].max() if side == 1 else L[-120:].min()
+        swings = [(Hh if side == 1 else L)[p] for p in _pivots(Hh if side == 1 else L, -side) if p >= i - 120]
+        cands = {z[0] for z in zones[-side]} | {ext} | set(swings) | ({hint} if hint is not None and np.isfinite(hint) else set())
+        # dated levels (tested zones, swing highs or lows, the 120-bar extreme) within 4 daily ATR of the entry
+        cands = sorted((x for x in cands if 0 < side * (x - entry) <= 4 * datr), key=lambda x: side * (x - entry))
+        if not cands:
             return
+        okA = [x for x in cands if ticket(sym, side, entry, stop, x, equity)["net_rr"] >= FLOOR]
+        tp1 = okA[0] if okA else cands[-1]  # TP A: the nearest dated level that clears the floor
+        tp2 = cands[-1] if side * (cands[-1] - tp1) > 0 else tp1  # TP B: the farthest dated level, the bigger move
         t = ticket(sym, side, entry, stop, tp2, equity, tp1); al = alignment(side, trend); flags = []
         if t["stop_pct"] < 0.5: flags.append("stop under 0.5%")
-        if t["net_rr"] < 3: flags.append(f"net {t['net_rr']}:1 under 3:1")
+        if t["net_rr_a"] < FLOOR: flags.append(f"net {t['net_rr_a']}:1 under {FLOOR}:1")
         if chasing(sym, side): flags.append("CHASING")
         if base(sym) not in GUARANTEED_STOP: flags.append("no guaranteed stop")
         if al == "against market" and vol == "high vol": flags.append("against market in high vol")
@@ -279,7 +276,7 @@ def structures(sym: str, equity: float) -> list[dict]:
         up = completed(bars(sym, "1d"), "1d") if (tf == "4h" and is_crypto(sym)) else (bars(sym, "1d") if tf == "4h" else None)
         out.append(dict(sym=base(sym), setup=setup, side="long" if side == 1 else "short", order=order,
                         entry=_fmt(entry), stop=_fmt(stop), tp1=_fmt(t["tp1"]), tp2=_fmt(tp2), stop_pct=t["stop_pct"],
-                        net_rr=t["net_rr"], lev=t["lev"], margin=t["margin"], touches=touches, tf=tf,
+                        net_rr=t["net_rr"], net_rr_a=t["net_rr_a"], lev=t["lev"], margin=t["margin"], touches=touches, tf=tf,
                         rsi=round(float(rsi(d.c).iat[-1]), 1), macd=macd_state(d.c), div=divergence(d, side),
                         div_up=divergence(up, side) if up is not None else "n/a", trend=trend, vol=vol, align=al,
                         away=round(abs(entry - px) / datr, 2), eligible="no: " + ", ".join(blocking) if blocking else "yes",
@@ -309,8 +306,8 @@ def structures(sym: str, equity: float) -> list[dict]:
             add("failed move", side, C[i], L[i] - 0.25 * a[i] if side == 1 else Hh[i] + 0.25 * a[i], hh[i] if side == 1 else ll[i], "maker limit")
     width = (pd.Series(hh) - pd.Series(ll)) / pd.Series(a)
     if width.iat[i] < width.rolling(200, min_periods=60).quantile(0.2).iat[i]:
-        add("bracket", 1, hh[i], ll[i] - 0.25 * a[i], hh[i] + 3 * (hh[i] - ll[i]), "stop entry")
-        add("bracket", -1, ll[i], hh[i] + 0.25 * a[i], ll[i] - 3 * (hh[i] - ll[i]), "stop entry")
+        add("bracket", 1, hh[i], ll[i] - 0.25 * a[i], None, "stop entry")
+        add("bracket", -1, ll[i], hh[i] + 0.25 * a[i], None, "stop entry")
     return out
 
 
@@ -408,20 +405,31 @@ def score_row(r: pd.Series) -> dict:
     if j0 >= len(d):
         return out
     fee_in = (TAKER if stop_entry else MAKER) * entry / risk; legs = []; closed_at = None
-    for tp in (tp1, tp2):
-        res = None
-        for j in range(j0, len(d)):
-            if (d.l.iat[j] <= stop) if side == 1 else (d.h.iat[j] >= stop):
-                res = (-1 - TAKER * entry / risk, d.index[j]); break
-            if j > j0 and np.isfinite(tp) and ((d.h.iat[j] >= tp) if side == 1 else (d.l.iat[j] <= tp)):
-                res = (abs(tp - entry) / risk - MAKER * entry / risk, d.index[j]); break
-        legs.append(res)
+    hit_stop = lambda j, lvl: (d.l.iat[j] <= lvl) if side == 1 else (d.h.iat[j] >= lvl)
+    hit_tp = lambda j, lvl: np.isfinite(lvl) and ((d.h.iat[j] >= lvl) if side == 1 else (d.l.iat[j] <= lvl))
+    legA, jA = None, None
+    for j in range(j0, len(d)):
+        if hit_stop(j, stop):
+            legA = (-1 - TAKER * entry / risk, d.index[j]); break
+        if j > j0 and hit_tp(j, tp1):
+            legA = (abs(tp1 - entry) / risk - MAKER * entry / risk, d.index[j]); jA = j; break
+    legB, s_run = None, stop
+    for j in range(j0, len(d)):
+        if jA is not None and j > jA:
+            s_run = entry  # runner to breakeven once TP A has filled
+        if hit_stop(j, s_run):
+            legB = (side * (s_run - entry) / risk - TAKER * entry / risk, d.index[j]); break
+        if j > j0 and hit_tp(j, tp2):
+            legB = (abs(tp2 - entry) / risk - MAKER * entry / risk, d.index[j]); break
+    legs = [legA, legB]
     mark = float(d.c.iat[-1]); openR = side * (mark - entry) / risk
     if all(legs):
         R = 0.5 * legs[0][0] + 0.5 * legs[1][0] - fee_in; closed_at = max(legs[0][1], legs[1][1])
         out.update(status="stopped" if R < 0 else "closed", closed_at=str(closed_at), R=round(R, 3))
     elif legs[0]:
         out.update(status="tp1" if legs[0][0] > 0 else "stopped", R=round(0.5 * legs[0][0] + 0.5 * openR - fee_in, 3))
+    elif legs[1]:
+        out.update(status="open", R=round(0.5 * legs[1][0] + 0.5 * openR - fee_in, 3))
     else:
         out.update(status="open", R=round(openR - fee_in, 3))
     out["mark"] = _fmt(mark)
@@ -470,7 +478,7 @@ def _live(x: pd.Series) -> pd.Series:
     return x.fillna("n").astype(str).str.lower().map(lambda v: "y" if v in ("y", "yes", "true") else "n")
 
 
-def prune(S: pd.DataFrame, days: int = 7) -> pd.DataFrame:
+def prune(S: pd.DataFrame, days: int = 3) -> pd.DataFrame:
     """Roll resolved rows older than `days` into one aggregate row per verdict and live flag."""
     done = resolved(S); cut = pd.Timestamp.now("UTC").tz_localize(None) - pd.Timedelta(days=days)
     old = done[pd.to_datetime(done.closed_at, errors="coerce") < cut]
@@ -562,7 +570,8 @@ def html(spec: dict) -> tuple[str, str]:
 # ---------- commands ----------
 def scan(equity: float, stocks: bool) -> None:
     age = feed_age_hours()
-    print(f"DATA: feed updated {manifest().get('updated_utc', 'unknown')} UTC ({age:.1f}h old){'; STALE, crypto from static-klines' if age > 3 else ''}")
+    print(f"DATA: feed updated {manifest().get('updated_utc', 'unknown')} UTC ({age:.1f}h old)"
+          + ("; STALE: quote current prices from a Coinbase ticker before printing any row" if age > 1.5 else ""))
     ct = market_trend("crypto"); print(f"REGIME: crypto market trend {ct} (BTC daily close vs EMA50)", end="")
     if stocks:
         print(f"; US market trend {market_trend('stocks')} (QQQ)", end="")
@@ -589,16 +598,19 @@ def scan(equity: float, stocks: bool) -> None:
         except Exception as e:
             print(f"  candidates for {s} unavailable ({type(e).__name__}: {e})")
     el = sorted((r for r in rows if r["eligible"] == "yes"), key=lambda r: r["away"]); nel = [r for r in rows if r["eligible"] != "yes"]
+    more = len(el) - 10; el = el[:10]  # the ten nearest get verdicts; the rest are too far to matter this window
     for n, r in enumerate(el, 1):
         r["cid"] = f"K{n}"
     pd.DataFrame(el).to_csv("candidates.csv", index=False)
-    print(f"CANDIDATES within 1.5 daily ATR of price, ELIGIBLE ({len(el)}), nearest first; each needs a verdict (equity {equity} USDT, 5% risk; saved to candidates.csv):")
+    print(f"CANDIDATES within 1.5 daily ATR of price, ELIGIBLE (the {len(el)} nearest), each needs a verdict (equity {equity} USDT, 5% risk; "
+          f"TP A is the nearest dated level at {FLOOR}:1 net or better, TP B the farthest within 4 daily ATR; saved to candidates.csv):")
     for r in el:
         print(f"  {r['cid']} {r['sym']} {r['side']} {r['setup']} ({r['tf']}, {r['order']}, {r['away']} ATR away): entry {r['entry']} stop {r['stop']} ({r['stop_pct']}%) "
-              f"TP A {r['tp1']} TP B {r['tp2']} net {r['net_rr']}:1, {r['lev']}x, margin {r['margin']}; RSI {r['rsi']}, MACD {r['macd']}, "
+              f"TP A {r['tp1']} ({r['net_rr_a']}:1) TP B {r['tp2']} ({r['net_rr']}:1), {r['lev']}x, margin {r['margin']}; RSI {r['rsi']}, MACD {r['macd']}, "
               f"divergence {r['div']} (daily {r['div_up']}); {r['align']}, {r['vol']}" + (f"; {r['flags']}" if r['flags'] else ""))
-    why = pd.Series(["under 3:1" if "3:1" in x else x.strip() for r in nel for x in r["eligible"][4:].split(",")]).value_counts()
-    print(f"NOT ELIGIBLE ({len(nel)} rows): " + ", ".join(f"{k} {v}" for k, v in why.items()))
+    why = pd.Series([f"under {FLOOR}:1" if f"{FLOOR}:1" in x else x.strip() for r in nel for x in r["eligible"][4:].split(",")]).value_counts()
+    print(f"NOT ELIGIBLE ({len(nel)} rows): " + ", ".join(f"{k} {v}" for k, v in why.items())
+          + (f"; {more} further eligible rows not listed (farther from price)" if more > 0 else ""))
     if "--all" in sys.argv:
         for r in nel:
             print(f"  {r['sym']} {r['side']} {r['setup']} {r['entry']} stop {r['stop']} tp2 {r['tp2']} ({r['eligible'][4:]})")
