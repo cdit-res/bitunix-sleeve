@@ -177,7 +177,9 @@ def open_risk(path: str | None) -> tuple[float, dict[str, float], int]:
     by: dict[str, float] = {}; total = 0.0
     for _, r in S.iterrows():
         book = str(r.setup).split()[0].upper()
-        rk = RISK.get(book, RISK["LEVELS"]); by[group(r.sym)] = by.get(group(r.sym), 0) + rk; total += rk
+        kv = dict(x.strip().split("=", 1) for x in str(r.note).split(";") if "=" in x)
+        rk = float(kv["risk"]) if "risk" in kv else RISK.get(book, RISK["LEVELS"])  # own rows carry their real risk
+        by[group(r.sym)] = by.get(group(r.sym), 0) + rk; total += rk
     lv = int(sum(not str(x).upper().startswith(("MAX10", "TREND")) for x in S.setup))
     return total, by, lv
 
