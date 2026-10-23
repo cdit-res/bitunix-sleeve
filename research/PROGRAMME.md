@@ -98,3 +98,9 @@ SW10 keeps MAX-10's entry and replaces the one-day exit. Checks before promotion
 
 Nothing adopted. The volume filter (SW16) and pyramid add-ons (SW18) improve the average trade but not the capped book. The short mirror of SW10 fails (SW17), so the book has no bear-market counterpart. Leveraged-ETF structures (SW14, SW15) fail at the assumed funding; the hedge against L x the underlying earns gross, but adjusted closes credit the long leg with dividends and coupons a perp does not pay, so it stays a lead until Bitunix funding on QQQ, TQQQ, TLT and TMF is known.
 
+## Swing batch 5, 23 October 2026
+
+SW10's rule on weekly bars (SW19 to SW21). Crypto beats its placebo in every set by +0.12R to +0.53R, with stops near 15% (about 3x), but at about three trades a coin a year it reaches only t 2.1 in design: a watch candidate, not a rule. Index ETFs and commodities fail.
+
+Where the search stands after 21 swing and position tests: one adopted rule (SW10), two refinements that improve the trade but not the book, and one weekly candidate short of power. The public daily price data for this universe looks close to exhausted; what could add more is data not yet in hand: Bitunix funding on the leveraged-ETF and index perps (SW15), and a live record for SW19.
+

@@ -246,6 +246,13 @@ ENTRIES: list[dict] = [
     dict(id="SW18", date="2026-10-23", family="swing momentum", hypothesis="Pyramid: add a unit on each new MAX-10 signal inside an open SW10 position (D5)", instruments="as SW10", timeframe="daily", hold="days",
          design="+0.758R (t 6.48)", held_out="+0.318R (t 2.04)", fresh="+0.304R (t 4.33); +0.012R over placebo add-ons", verdict="passes the trade gate; not adopted", script="swing_batch4.py, swing_batch4_checks.py",
          notes="Random add-ons inside open positions do almost as well on fresh coins: the gain is from being in a trend, not the add-on signal. Capped book: core four +44.1R a year (SR 1.26, worst drawdown -84%) but ten coins SR 0.79 with a -98% drawdown"),
+    dict(id="SW19", date="2026-10-23", family="position momentum", hypothesis="SW10's rule on weekly bars, crypto (E1): weekly close at a 10-week high, stop 1 weekly ATR, exit below the prior three weekly closes or after ten weeks", instruments="as SW10", timeframe="weekly", hold="median 3 weeks",
+         design="+1.112R (t 2.14, n 66)", held_out="+0.286R (t 0.79, n 37)", fresh="+0.959R (t 1.82, n 128)", verdict="fail on power; watch", script="swing_batch5.py",
+         notes="Beats its placebo in every set (+0.53R, +0.12R, +0.48R) but about three trades a coin a year is too few for t 3. Median stop 14.8%, about 3x under the sleeve's rule"),
+    dict(id="SW20", date="2026-10-23", family="position momentum", hypothesis="Weekly SW10 on index ETFs (E2)", instruments="SPY, QQQ; fresh 12 ETFs", timeframe="weekly", hold="median 4 weeks",
+         design="-0.016R (t -0.16)", held_out="+0.213R (t 1.45)", fresh="+0.043R (t 1.00)", verdict="fail", script="swing_batch5.py", notes="No better than its placebo"),
+    dict(id="SW21", date="2026-10-23", family="position momentum", hypothesis="Weekly SW10 on commodity futures (E3)", instruments="8 commodity futures", timeframe="weekly", hold="median 4 weeks",
+         design="+0.074R (t 0.74)", held_out="+0.360R (t 2.28)", fresh="n/a", verdict="fail", script="swing_batch5.py", notes="Design no better than its placebo"),
 ]
 
 
