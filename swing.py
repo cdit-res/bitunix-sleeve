@@ -1,8 +1,10 @@
 """Swing book for the 08:30 run, from 23 Oct 2026: $100 start, isolated margin, leverage read off the stop.
 
 Books, in budget priority:
-  MAX-10   crypto only (BTC, ETH, SOL, XRP tested; INJ untested). Long at the run after a 10-day closing high,
-           stop 1 daily ATR, exit at the next run unless it repeats. 4% risk a row.
+  MAX-10   crypto only (BTC, ETH, SOL, XRP tested; INJ untested). Long at the run after a daily close at or above
+           the prior ten closes, stop 1 daily ATR below that close. Held as a swing (swing_batch2.py B3, from 23 Oct
+           2026): exit at the run after a close below the lowest of the prior three closes, or after ten closes.
+           4% risk a row.
   TREND    20, 60 and 150-day closing highs, stop at the channel midpoint trailed daily (trend_subset.py rules),
            crypto, commodities, index and sector ETFs, 20 most traded Bitunix stocks. 2% risk a slice. New signals only.
   LEVELS   4h tested levels from engine.scan, crypto only, 2% a row, at most two open (10% of the 40% budget).
@@ -41,7 +43,7 @@ GROUPS = {
     "Asia ETFs": {"EWJ", "EWT", "EWY"},
 }
 EVIDENCE = {
-    "MAX10": "beats placebo every set (+0.078R net, n 4740)",
+    "MAX10": "swing hold (SW10): +0.40R a trade net (t 5.6, n 1601), beats its placebo in every set",
     "TREND crypto": "passes gate, fails placebo: beta plus exit",
     "TREND etf": "ETF trend passes at Bitunix funding, fails placebo: beta",
     "TREND commodity": "untested on the futures; GLD and SLV tested inside the ETF set",
@@ -110,6 +112,62 @@ def size(sym: str, entry: float, stop: float, risk: float, equity: float) -> dic
                 notional=t["notional"], margin=t["margin"])
 
 
+def held_max10(path: str | None) -> dict[str, dict]:
+    """Live, open MAX-10 rows in the state file, by coin: signal day (note sig=, else the day before the run) and stop."""
+    if not path or not Path(path).exists():
+        return {}
+    S = pd.read_csv(path, dtype=str); out = {}
+    S = S[S.status.isin(["open", "tp1"]) & S.live.astype(str).str.lower().isin(["y", "yes"]) & S.setup.astype(str).str.upper().str.startswith("MAX10")]
+    for _, r in S.iterrows():
+        kv = dict(x.strip().split("=", 1) for x in str(r.note).split(";") if "=" in x)
+        sig = kv.get("sig") or str((pd.Timestamp(r.run) - pd.Timedelta(days=1)).date())
+        out[str(r.sym)] = dict(signal_day=sig, stop=r.stop, entry=r.entry, id=r.id)
+    return out
+
+
+def max10_swing(sym: str, held: dict | None) -> dict:
+    """Today's MAX-10 swing action for one coin from completed daily closes."""
+    d = E.daily_done(sym); c = d.c; a = E.atr(d); prior = float(c.iloc[-11:-1].max())
+    out = dict(sym=sym, day=str(d.index[-1].date()), close=E._fmt(c.iat[-1]), prior_high=E._fmt(prior))
+    if held:
+        n_after = int((d.index > pd.Timestamp(held["signal_day"])).sum()); low3 = float(c.iloc[-4:-1].min())
+        if c.iat[-1] < low3:
+            out["action"] = f"EXIT at market: close {E._fmt(c.iat[-1])} below the prior three closes ({E._fmt(low3)})"
+        elif n_after >= 10:
+            out["action"] = "EXIT at market: ten closes since entry"
+        else:
+            out["action"] = f"HOLD ({n_after} of 10 closes), stop {held['stop']} unchanged"
+    elif c.iat[-1] >= prior:
+        out["action"] = "BUY"; out["stop"] = float(c.iat[-1] - a.iat[-1])
+    else:
+        out["action"] = "none"
+    return out
+
+
+def max10_swing_record(since: str = "2026-09-28", coins: tuple[str, ...] = ("BTC", "ETH", "SOL", "XRP")) -> pd.DataFrame:
+    """Mechanical paper record of the swing rule on daily closes since `since` (entry and exit at the 00:00 UTC close)."""
+    rows = []
+    for s in coins:
+        d = E.daily_done(s); c, lo, o = d.c.values, d.l.values, d.o.values; a = E.atr(d).values
+        sig = (d.c >= d.c.rolling(10).max().shift(1)).values; k = max(20, int(d.index.searchsorted(pd.Timestamp(since))) - 1)
+        while k < len(d) - 1:
+            if not sig[k]:
+                k += 1; continue
+            e, st = c[k], c[k] - a[k]; j = k + 1; ex = None
+            while j < len(d):
+                if o[j] <= st or lo[j] <= st:
+                    ex = min(st, o[j]); break
+                if c[j] < c[j - 3:j].min() or j >= k + 10:
+                    ex = c[j]; break
+                j += 1
+            if ex is None:
+                rows.append(dict(sym=s, entry_day=str(d.index[k].date()), R=np.nan, status="open")); break
+            rows.append(dict(sym=s, entry_day=str(d.index[k].date()), exit_day=str(d.index[j].date()),
+                             R=round((ex - e) / a[k] - (2 * 0.0008 + 0.0003 * (j - k)) * e / a[k], 3), status="closed"))
+            k = j + 1
+    return pd.DataFrame(rows)
+
+
 def open_risk(path: str | None) -> tuple[float, dict[str, float], int]:
     """Risk already open on live rows in the state file, by group, and the number of open LEVELS rows."""
     if not path or not Path(path).exists():
@@ -134,18 +192,22 @@ def main(argv: list[str]) -> None:
     universe = [(s, "crypto") for s in CRYPTO] + [(s, "commodity") for s in COMMOD] + [(s, "etf") for s in ETFS] \
         + [(s, "stock") for s in stocks]
     cands, active = [], []
-    print("MAX-10 (at the 00:00 UTC daily close):")
+    held = held_max10(state)
+    print("MAX-10 SWING (at the 00:00 UTC daily close; exits and holds apply to live rows in the state file):")
     for s in CRYPTO:
         try:
-            m = E.max10(s)
+            m = max10_swing(s, held.get(s))
         except Exception as e:
             print(f"  {s}: MAX-10 unavailable ({type(e).__name__})"); continue
-        print(f"  MAX-10 {s}: {m['action']} (close {m['close']} vs prior 10-day high {m['prior_10d_high']})")
-        if m["action"] in ("buy", "roll"):
-            row = dict(sym=s, book="MAX10", rule=f"MAX-10 {m['action']}", cls="crypto", prio=0,
-                       note=EVIDENCE["MAX10"] + ("" if s in MAX10_TESTED else "; INJ untested for MAX-10"),
-                       **size(s, m["price"], m["stop"], RISK["MAX10"], eq))
-            (cands if m["action"] == "buy" else active).append(row)
+        print(f"  MAX-10 {s}: {m['action']} (close {m['close']} on {m['day']} vs prior ten-close high {m['prior_high']})")
+        if m["action"] == "BUY":
+            px = E.price(s)[0]
+            if px <= m["stop"]:
+                print(f"    skipped: price {E._fmt(px)} already at or below the stop"); continue
+            row = dict(sym=s, book="MAX10", rule=f"MAX-10 swing, signal close {m['day']}", cls="crypto", prio=0,
+                       note=EVIDENCE["MAX10"] + ("" if s in MAX10_TESTED else "; INJ untested for MAX-10")
+                       + f"; log note sig={m['day']}", **size(s, px, m["stop"], RISK["MAX10"], eq))
+            cands.append(row)
     for s, cls in universe:
         try:
             d = daily(s)
@@ -185,6 +247,11 @@ def main(argv: list[str]) -> None:
     for r in sorted(active, key=lambda r: (r["cls"], r["sym"])):
         print(f"  {r['sym']} {r['rule']}: today's stop {r['stop']} ({r['stop_pct']}% below {r['entry']})")
     print(f"TOP 20 STOCKS by 60-day median traded value: {', '.join(stocks)}")
+    rec = max10_swing_record()
+    done = rec[rec.status == "closed"] if len(rec) else rec
+    print("MAX-10 SWING PAPER since 28 Sep (daily closes, core four): "
+          + (f"{len(done)} closed, mean {done.R.mean():+.2f}R, total {done.R.sum():+.2f}R" if len(done) else "none closed")
+          + (f"; {int((rec.status == 'open').sum())} open" if len(rec) else ""))
 
 
 if __name__ == "__main__":

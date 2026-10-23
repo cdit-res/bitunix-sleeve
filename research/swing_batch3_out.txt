@@ -1,0 +1,31 @@
+C1 B3 on the feed's other coins (fresh evidence, June 2022 on)
+  NEAR: signal n 95, mean +0.237R, t +1.03; placebo n 1579, mean +0.097R, t +2.31; difference +0.140R
+  INJ: signal n 99, mean +0.322R, t +1.20; placebo n 1579, mean +0.160R, t +3.52; difference +0.161R
+  LTC: signal n 102, mean -0.203R, t -1.52; placebo n 1579, mean -0.085R, t -2.62; difference -0.119R
+  FET: signal n 94, mean +0.379R, t +1.24; placebo n 1579, mean +0.043R, t +0.97; difference +0.336R
+  RUNE: signal n 88, mean +0.430R, t +1.50; placebo n 1579, mean +0.138R, t +2.82; difference +0.292R
+  SUI: signal n 65, mean +0.246R, t +0.99; placebo n 1248, mean +0.040R, t +0.92; difference +0.206R
+  TAO: signal n 45, mean +0.379R, t +1.38; placebo n 904, mean -0.006R, t -0.14; difference +0.385R
+  pooled: signal n 588, mean +0.238R, t +2.46; placebo n 10047, mean +0.060R, t +3.65; difference +0.178R
+C2 B3 on commodity futures
+  C2 commodities: design n 1988, mean +0.055R, t +1.02 [halves n 850, mean +0.095R, t +1.22 / n 1138, mean +0.026R, t +0.34]; held-out n 1290, mean -0.057R, t -0.97
+    placebo: design n 30890, mean -0.009R, t -0.75; held-out n 19713, mean -0.023R, t -1.84
+    signal minus placebo: design +0.064R; held-out -0.034R
+    double costs (design): n 1988, mean -0.095R, t -1.77
+  GATE C2 commodities: FAIL (design t >= 3; held-out positive; placebo beaten; double costs t >= 2)
+      GC=F: n 437, mean +0.135R, t +1.37
+      SI=F: n 425, mean +0.059R, t +0.53
+      PL=F: n 416, mean +0.008R, t +0.06
+      PA=F: n 420, mean +0.142R, t +0.78
+      CL=F: n 428, mean -0.035R, t -0.50
+      BZ=F: n 314, mean -0.096R, t -1.08
+      HG=F: n 424, mean -0.054R, t -0.56
+      NG=F: n 414, mean -0.104R, t -1.45
+C3 B3 on index ETFs
+  C3 index ETFs: design n 765, mean -0.185R, t -4.28 [halves n 301, mean -0.147R, t -2.11 / n 464, mean -0.210R, t -3.80]; held-out n 360, mean +0.110R, t +1.47
+    placebo: design n 10470, mean -0.135R, t -10.98; held-out n 4928, mean -0.031R, t -1.50; fresh n 80433, mean -0.108R, t -21.22
+    fresh: n 5473, mean -0.097R, t -4.83; minus placebo +0.010R
+    signal minus placebo: design -0.050R; held-out +0.141R
+    double costs (design): n 765, mean -0.381R, t -8.96
+  GATE C3 index ETFs: FAIL (design t >= 3; both halves positive; fresh positive; placebo beaten; double costs t >= 2)
+PASSED: none

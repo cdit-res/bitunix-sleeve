@@ -1,0 +1,75 @@
+1. B3 by year (core and fresh pooled) and by coin
+   2017: n 20, mean +1.249R, t +2.16
+   2018: n 65, mean -0.029R, t -0.17
+   2019: n 113, mean +0.483R, t +2.16
+   2020: n 190, mean +0.803R, t +3.15
+   2021: n 227, mean +0.880R, t +3.28
+   2022: n 174, mean +0.050R, t +0.29
+   2023: n 236, mean +0.415R, t +2.56
+   2024: n 221, mean +0.470R, t +2.20
+   2025: n 197, mean -0.070R, t -0.63
+   2026: n 158, mean +0.088R, t +0.51
+   ADA: n 165, mean +0.386R, t +1.86; exits: {'low': 88, 'stop': 59, 'time': 18}; median hold 4 days
+   AVAX: n 115, mean +0.854R, t +2.42; exits: {'low': 74, 'stop': 31, 'time': 10}; median hold 4 days
+   BNB: n 193, mean +0.262R, t +1.90; exits: {'low': 102, 'stop': 74, 'time': 17}; median hold 4 days
+   BTC: n 206, mean +0.363R, t +2.28; exits: {'low': 115, 'stop': 70, 'time': 21}; median hold 4 days
+   DOGE: n 135, mean +0.750R, t +1.88; exits: {'low': 68, 'stop': 56, 'time': 11}; median hold 3 days
+   DOT: n 132, mean -0.126R, t -0.94; exits: {'low': 66, 'stop': 58, 'time': 8}; median hold 3 days
+   ETH: n 197, mean +0.374R, t +2.39; exits: {'low': 103, 'stop': 75, 'time': 19}; median hold 4 days
+   LINK: n 166, mean +0.383R, t +2.13; exits: {'low': 104, 'stop': 50, 'time': 12}; median hold 4 days
+   SOL: n 136, mean +0.399R, t +1.94; exits: {'low': 81, 'stop': 43, 'time': 12}; median hold 4 days
+   XRP: n 156, mean +0.495R, t +1.56; exits: {'low': 90, 'stop': 59, 'time': 7}; median hold 3 days
+2. Regime at entry (core and fresh pooled), signal against placebo
+   btc down: signal n 428, mean +0.116R, t +1.12; placebo n 12236, mean -0.027R, t -2.22; difference +0.143R
+   btc flat: signal n 187, mean +0.221R, t +1.51; placebo n 2134, mean +0.057R, t +1.53; difference +0.164R
+   btc up: signal n 986, mean +0.557R, t +5.46; placebo n 13848, mean +0.306R, t +13.92; difference +0.252R
+   vol high vol: signal n 512, mean +0.205R, t +1.97; placebo n 12096, mean +0.039R, t +2.63; difference +0.166R
+   vol low vol: signal n 1089, mean +0.492R, t +5.35; placebo n 16122, mean +0.220R, t +11.87; difference +0.272R
+3. Execution at the 08:30 run (2022 on, hourly fills and stops)
+   at the daily close: signal n 986, mean +0.213R, t +2.75; placebo n 17545, mean +0.051R, t +3.88
+   at 08:00 UTC fills: signal n 979, mean +0.197R, t +2.55; placebo n 17186, mean +0.057R, t +4.22; difference +0.140R
+      ADA: n 88, mean +0.270R, t +0.92
+      AVAX: n 90, mean +0.297R, t +1.15
+      BNB: n 102, mean +0.008R, t +0.05
+      BTC: n 112, mean +0.151R, t +0.77
+      DOGE: n 91, mean +0.532R, t +1.31
+      DOT: n 99, mean -0.126R, t -0.87
+      ETH: n 104, mean +0.205R, t +1.05
+      LINK: n 102, mean +0.066R, t +0.35
+      SOL: n 103, mean +0.237R, t +1.17
+      XRP: n 88, mean +0.415R, t +1.15
+4. Exit sensitivity (core design to 2023 | core held-out 2024 on | fresh), signal minus placebo
+   exit below prior 2 closes, cap 5 days: +0.337R (t +3.9) vs +0.093R | +0.256R (t +2.4) vs +0.041R | +0.304R (t +4.1) vs +0.068R
+   exit below prior 2 closes, cap 10 days: +0.458R (t +4.0) vs +0.149R | +0.317R (t +1.9) vs +0.078R | +0.344R (t +4.2) vs +0.118R
+   exit below prior 2 closes, cap 20 days: +0.486R (t +4.4) vs +0.186R | +0.380R (t +1.8) vs +0.117R | +0.372R (t +4.1) vs +0.135R
+   exit below prior 3 closes, cap 5 days: +0.341R (t +3.7) vs +0.100R | +0.223R (t +1.9) vs +0.025R | +0.324R (t +4.2) vs +0.070R
+   exit below prior 3 closes, cap 10 days: +0.454R (t +3.6) vs +0.185R | +0.302R (t +1.6) vs +0.061R | +0.398R (t +4.1) vs +0.142R
+   exit below prior 3 closes, cap 20 days: +0.561R (t +4.0) vs +0.243R | +0.373R (t +1.5) vs +0.090R | +0.470R (t +4.0) vs +0.220R
+   exit below prior 5 closes, cap 5 days: +0.343R (t +3.6) vs +0.118R | +0.229R (t +1.9) vs +0.032R | +0.326R (t +4.1) vs +0.065R
+   exit below prior 5 closes, cap 10 days: +0.501R (t +3.5) vs +0.255R | +0.324R (t +1.6) vs +0.088R | +0.438R (t +4.0) vs +0.144R
+   exit below prior 5 closes, cap 20 days: +0.769R (t +3.9) vs +0.392R | +0.393R (t +1.4) vs +0.202R | +0.578R (t +4.0) vs +0.266R
+5. Book, three rows at most (4% risk each), marked to market, Oct 2020 on
+  B3 swing, core four: +25.8R a year, daily SR 1.14, t +2.81, worst drawdown at 4% a row -75%, worst month -32%, best month +194%, equity x53.9 over 6.1 years
+     2020: +48.8R
+     2021: +41.0R
+     2022: -8.3R
+     2023: +42.5R
+     2024: +28.6R
+     2025: -4.0R
+     2026: +7.8R
+  MAX-10 one-day, core four: +12.1R a year, daily SR 0.73, t +1.80, worst drawdown at 4% a row -67%, worst month -23%, best month +93%, equity x5.4 over 6.1 years
+     2020: +20.7R
+     2021: +16.9R
+     2022: -15.1R
+     2023: +27.8R
+     2024: +12.9R
+     2025: +4.5R
+     2026: +5.4R
+  B3 swing, core four plus fresh six: +32.5R a year, daily SR 1.20, t +2.96, worst drawdown at 4% a row -85%, worst month -38%, best month +381%, equity x103.2 over 6.1 years
+     2020: +48.4R
+     2021: +102.0R
+     2022: -9.7R
+     2023: +30.4R
+     2024: +24.7R
+     2025: -10.9R
+     2026: +11.8R

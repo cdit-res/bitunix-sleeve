@@ -81,3 +81,16 @@ The owner asked for better swing edges than MAX-10. Five constructions with the 
 | Volatility-managed SPY and QQQ | alpha t +0.88 | Alpha over constant exposure never reaches t 2; negative on fresh ETFs |
 
 What this adds to the record: on perps, any hold of weeks pays funding on the whole notional, about 3.8% a year on tradfi at the assumed 0.0105% a day and about 11% a year on crypto longs at 0.03% a day. That takes roughly half the Sharpe of a slow book, so a position strategy has to beat simply holding the same markets by more than the funding. Nothing tested here does. MAX-10 remains the only entry edge: a one-day hold pays little funding.
+
+## Swing batches 2 and 3, 23 October 2026
+
+| Test | Result | Verdict |
+|---|---|---|
+| Month-end rebalancing front-run (SPY; SPY minus TLT) | +0.47% and +0.62% an event in design (t 1.6, 1.4); beats every mid-month window; negative since March 2023 | fail |
+| Option-expiration week | flat in design, negative held out | fail |
+| RSI-2 index dips entered at the next open | +0.06R (t 1.4); the close entry earns +0.14R | fail: SC6 needs a close entry |
+| MAX-10 held as a swing (SW10) | +0.45R design (t 3.6), +0.30R held out, +0.40R fresh (t 4.1); beats its placebo by about +0.25R in every set | **PASS, promoted** |
+| SW10 on commodities; on index ETFs | +0.06R, held out -0.06R; design -0.19R | fail |
+
+SW10 keeps MAX-10's entry and replaces the one-day exit. Checks before promotion (swing_b3_checks.py): beats its placebo in every BTC regime and volatility state; every exit setting from two to five closes and five to twenty days beats its placebo in every set; filled at 08:00 UTC it keeps +0.14R over placebo (2022 on); in a book capped at three rows of 4% it made +25.8R a year with a daily Sharpe of 1.14, against +12.1R and 0.73 for the one-day hold, with a worst drawdown of -75% at 4% a row (-45% at 2%). Weak spot: 2025 (-0.07R a trade, -4.0R for the capped book) and the paper month since 28 September (three trades, -3.25R).
+

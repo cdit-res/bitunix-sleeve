@@ -1,0 +1,4 @@
+one-day hold, close to close: signal n 2653, mean +0.041R, t +2.40; placebo n 17350, mean -0.028R, t -5.62; difference +0.069R
+   core four: signal n 1108, mean +0.048R, t +1.87; placebo n 6940, mean -0.022R, t -2.67
+one-day hold, 08:00 UTC fills: signal n 2631, mean +0.035R, t +2.00; placebo n 17222, mean -0.029R, t -5.73; difference +0.064R
+   core four: signal n 1099, mean +0.048R, t +1.84; placebo n 6885, mean -0.022R, t -2.65

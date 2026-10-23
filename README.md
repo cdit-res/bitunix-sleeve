@@ -8,7 +8,7 @@ The 08:30 run's book: $100 start, isolated margin, leverage read off the stop. `
 
 | Book | Rule | Risk a row | Universe |
 |---|---|---|---|
-| MAX-10 | Long after a 10-day closing high, 1 daily ATR stop, exit next run unless it repeats | 4% | BTC, ETH, SOL, XRP (tested), INJ (untested) |
+| MAX-10 swing | Long after a 10-day closing high, 1 daily ATR stop; exit at the run after a close below the prior three closes, or after ten closes (SW10) | 4% | BTC, ETH, SOL, XRP (tested), INJ (extra fresh set) |
 | Trend | 20, 60 and 150-day closing highs, midpoint stop trailed daily; new signals only | 2% a slice | crypto, eight commodities, 12 ETFs, 20 most traded Bitunix stocks |
 | Levels | 4h tested levels from `engine.py scan --crypto-only` | 2%, two rows at most | crypto |
 
@@ -73,6 +73,10 @@ Each script's header records its settings, fixed before it was run.
 | placebo_crypto.py | The passing crypto edges against random or unconditional entries with the same exit | MAX-10 beats its placebo in every set; the trend ensemble does not |
 | swing_search.py | Swing and position search, pre-registered 23 Oct 2026: diversified time-series momentum (long and short), commodity and crypto cross-sectional momentum, cross-asset rotation, volatility-managed index exposure | Fail, all five. Held-out Sharpe -0.13, -0.16, -1.48, +0.16 and alpha t +0.88. Gross of costs the trend and rotation books reach t 3.7 to 3.9, but holding the same markets long does better: the signals add nothing, and funding on gross notional takes about half the Sharpe |
 | swing_search_checks.py | Gross-of-cost diagnostic; MAX-10 on ten coins under the three-row cap | Ten coins add R a year but lower the Sharpe and deepen the worst drawdown: not adopted |
+| swing_batch2.py | Batch 2, pre-registered 23 Oct 2026: month-end rebalancing front-run (SPY; SPY minus TLT), option-expiry week, MAX-10 held as a swing, RSI-2 index dips entered at the next open | Month-end flows beat every mid-month placebo window but reach only t 1.6 and have faded since March 2023; expiry week fails; RSI-2 dips need a close entry (next-open entry loses the edge); MAX-10 as a swing passes (see swing_b3_checks.py) |
+| swing_b3_checks.py | Disproof of B3: years, coins, regimes, fills at 08:00 UTC, exit settings, a capped book marked to market | Holds: beats placebo in every regime and at every exit setting; 08:00 UTC fills keep +0.14R over placebo; capped book +25.8R a year against +12.1R for the one-day hold |
+| swing_exec_compare.py | MAX-10's one-day hold filled at 08:00 UTC | Keeps its edge: +0.064R over placebo against +0.069R at the close |
+| swing_batch3.py | B3 on the feed's other coins, commodities and index ETFs | Holds on six of seven extra coins (+0.24R, t 2.5); fails on commodities and ETFs: a crypto effect |
 | fetch_data.py | Rebuilds `data/` from the public sources | |
 
 Rules for any change: net of fees, t of 3 or more, the same sign in both halves, a held-out period run once, fresh symbols, and a placebo the signal must beat. Count every variant tried. The full record is research/LEDGER.md and research/PROGRAMME.md.
