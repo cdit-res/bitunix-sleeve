@@ -71,6 +71,8 @@ Each script's header records its settings, fixed before it was run.
 | batch5_etf.py | Trend on index, sector, country and metal ETFs; overnight drift after down days | ETF trend passes at Bitunix funding but random entries match it (beta) |
 | batch4_crypto.py | Taker-flow persistence, round-number fades, Asia-range bracket, turtle soup, funding filter, volatility scaling | Fail; improvements not adopted |
 | placebo_crypto.py | The passing crypto edges against random or unconditional entries with the same exit | MAX-10 beats its placebo in every set; the trend ensemble does not |
+| swing_search.py | Swing and position search, pre-registered 23 Oct 2026: diversified time-series momentum (long and short), commodity and crypto cross-sectional momentum, cross-asset rotation, volatility-managed index exposure | Fail, all five. Held-out Sharpe -0.13, -0.16, -1.48, +0.16 and alpha t +0.88. Gross of costs the trend and rotation books reach t 3.7 to 3.9, but holding the same markets long does better: the signals add nothing, and funding on gross notional takes about half the Sharpe |
+| swing_search_checks.py | Gross-of-cost diagnostic; MAX-10 on ten coins under the three-row cap | Ten coins add R a year but lower the Sharpe and deepen the worst drawdown: not adopted |
 | fetch_data.py | Rebuilds `data/` from the public sources | |
 
 Rules for any change: net of fees, t of 3 or more, the same sign in both halves, a held-out period run once, fresh symbols, and a placebo the signal must beat. Count every variant tried. The full record is research/LEDGER.md and research/PROGRAMME.md.

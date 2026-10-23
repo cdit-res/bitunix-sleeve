@@ -67,3 +67,17 @@ Why intraday fails, in one line: with a stop of b, a drift edge is worth about b
 | Short volatility carry (UVXY) | Positive in 10 of 13 years, t 2.1: under the gate |
 | Funding, open interest and liquidations over time | Blocked by data: collect forward (feed can add Hyperliquid) |
 | The evaluator's judgement | Only measurable live: TAKE minus PASS, now logged on every eligible row |
+
+## Swing search, 23 October 2026
+
+The owner asked for better swing edges than MAX-10. Five constructions with the longest published records were pre-registered and run once (swing_search.py; ledger SW1 to SW6). None passed.
+
+| Test | Held-out | Why it failed |
+|---|---|---|
+| Diversified time-series momentum, long and short | SR -0.13 | Long-only on the same markets beats it; the signs add nothing |
+| Commodity cross-sectional momentum | SR -0.16 | No signal gross of costs (SR +0.15) |
+| Crypto cross-sectional momentum | SR -1.48 | Reverses after 2023 |
+| Cross-asset relative momentum | SR +0.16 | Random picks from the same positive-momentum set do as well |
+| Volatility-managed SPY and QQQ | alpha t +0.88 | Alpha over constant exposure never reaches t 2; negative on fresh ETFs |
+
+What this adds to the record: on perps, any hold of weeks pays funding on the whole notional, about 3.8% a year on tradfi at the assumed 0.0105% a day and about 11% a year on crypto longs at 0.03% a day. That takes roughly half the Sharpe of a slow book, so a position strategy has to beat simply holding the same markets by more than the funding. Nothing tested here does. MAX-10 remains the only entry edge: a one-day hold pays little funding.

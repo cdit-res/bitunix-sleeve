@@ -1,0 +1,50 @@
+H1 diversified time-series momentum, weekly
+  design markets: full SR +0.31 t +1.76 (32.7y); design SR +0.43 t +2.07 (22.9y) [halves SR +0.64 t +2.17 (11.5y) / SR +0.11 t +0.39 (11.5y)]; held-out SR -0.13 t -0.40 (9.8y); max DD at 10% vol -41%
+  long-only same markets (baseline): full SR +0.61 t +3.48 (32.7y); design SR +0.62 t +2.97 (22.9y) [halves SR +0.89 t +3.01 (11.5y) / SR +0.24 t +0.83 (11.5y)]; held-out SR +0.59 t +1.84 (9.8y); max DD at 10% vol -37%
+  placebo: above 100% of random-sign draws (95th percentile SR -0.46)
+  double costs: SR -0.07 t -0.40 (32.7y)
+    diagnostic, commodities sleeve: SR +0.04 t +0.23 (28.0y)
+    diagnostic, SPY sleeve: SR +0.39 t +2.25 (32.7y)
+    diagnostic, TLT sleeve: SR -0.18 t -0.85 (23.2y)
+    diagnostic, BTC sleeve: SR +0.68 t +1.94 (8.2y)
+  fresh markets: SR +0.07 t +0.41 (29.6y)
+  alpha over long-only baseline: +0.02% a month, t +0.31
+  GATE H1: FAIL (full t >= 3; held-out positive; double costs t >= 2)
+
+H2 commodity cross-sectional momentum, monthly
+  eight commodities: full SR -0.14 t -0.71 (25.1y); design SR -0.13 t -0.51 (15.3y) [halves SR -0.00 t -0.01 (7.7y) / SR -0.26 t -0.72 (7.7y)]; held-out SR -0.16 t -0.50 (9.8y); max DD at 10% vol -53%
+  placebo: above 92% of random-rank draws (95th percentile SR -0.09)
+  double costs: SR -0.44 t -2.18 (25.1y)
+  GATE H2: FAIL (full t >= 3; both design halves positive; held-out positive; above placebo 95th percentile; double costs t >= 2)
+
+H3 crypto cross-sectional momentum, weekly
+  ten core coins: full SR -0.16 t -0.44 (7.4y); design SR +0.42 t +0.91 (4.6y) [halves SR +0.36 t +0.54 (2.3y) / SR +0.52 t +0.79 (2.3y)]; held-out SR -1.48 t -2.48 (2.8y); max DD at 10% vol -31%
+  placebo: above 80% of random-rank draws (95th percentile SR +0.09)
+  double costs: SR -0.49 t -1.33 (7.4y)
+  fresh coins: SR -0.03 t -0.06 (3.1y)
+  GATE H3: FAIL (full t >= 3; held-out positive; fresh positive; above placebo 95th percentile; double costs t >= 2)
+
+H4 cross-asset relative momentum, long only, monthly
+  fifteen ETFs: full SR +0.41 t +2.37 (33.2y); design SR +0.52 t +2.53 (23.4y) [halves SR +0.65 t +2.24 (11.7y) / SR +0.39 t +1.35 (11.7y)]; held-out SR +0.16 t +0.50 (9.8y); max DD at 10% vol -33%
+  placebo: above 55% of random picks among positive momentum (95th percentile SR +0.50)
+  all positive-momentum assets (baseline): full SR +0.48 t +2.76 (33.2y); design SR +0.48 t +2.32 (23.4y) [halves SR +0.63 t +2.16 (11.7y) / SR +0.31 t +1.06 (11.7y)]; held-out SR +0.48 t +1.50 (9.8y); max DD at 10% vol -27%
+  double costs: SR +0.18 t +1.01 (33.2y)
+  GATE H4: FAIL (full t >= 3; above placebo 95th percentile; double costs t >= 2)
+
+H5 volatility-managed index exposure, monthly
+  SPY and QQQ managed: full SR +0.40 t +2.30 (32.7y); design SR +0.28 t +1.32 (22.8y) [halves SR +0.09 t +0.32 (11.4y) / SR +0.43 t +1.45 (11.4y)]; held-out SR +0.71 t +2.22 (9.8y); max DD at 10% vol -37%
+  SPY and QQQ constant: full SR +0.36 t +2.08 (32.7y); design SR +0.20 t +0.97 (22.8y) [halves SR +0.05 t +0.18 (11.4y) / SR +0.35 t +1.19 (11.4y)]; held-out SR +0.74 t +2.30 (9.8y); max DD at 10% vol -44%
+  alpha over constant exposure: full +0.26%/month t +1.39; design halves t +0.02 / +1.12; held-out +0.36% t +0.88
+  double costs alpha t -1.07
+  fresh ETFs alpha -0.22%/month t -0.96; BTC alpha -0.51% t -0.35
+  GATE H5: FAIL
+
+Correlation of daily returns with MAX-10 (sum of R by exit day), 2017 on:
+  H1: +0.12 (n 1070)
+  H2: +0.01 (n 743)
+  H3: -0.12 (n 907)
+  H4: +0.11 (n 741)
+  H5: +0.12 (n 741)
+
+PASSED: none
+

@@ -343,7 +343,7 @@ def main() -> None:
 
     print("\nCorrelation of daily returns with MAX-10 (sum of R by exit day), 2017 on:")
     for h in ("H1", "H2", "H3", "H4", "H5"):
-        x = results[f"{h}_x"]; j = pd.concat([x, m10], axis=1).dropna(); j = j[j.index >= "2017-09-01"]
+        x = results[f"{h}_x"]; j = pd.concat([x, m10], axis=1, sort=True).dropna(); j = j[j.index >= "2017-09-01"]
         print(f"  {h}: {j.corr().iat[0, 1]:+.2f} (n {len(j)})")
     print("\nPASSED: " + (", ".join(h for h in ("H1", "H2", "H3", "H4", "H5") if results[h]) or "none"))
 
