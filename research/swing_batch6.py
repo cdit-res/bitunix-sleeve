@@ -6,10 +6,11 @@ close; perp returns plus funding as posted; 0.08% a side on turnover. Halves by 
 (2020 to 2023) and held out (2024 on), B fresh. Placebo: 200 draws of random ranks. Gate as before.
 
 G1 Cross-sectional momentum on 50 perps (Liu, Tsyvinski and Wu, 2022): rank on the 28-day return; long the top
-   fifth, short the bottom fifth, equal risk; at least 20 eligible. H3 failed on ten coins; this asks whether a
+   fifth, short the bottom fifth, equal risk; at least 10 eligible (amended from 20 before any result: a half of
+   the universe never has 20 before 2024). H3 failed on ten coins; this asks whether a
    wider cross-section changes that.
 G2 Cross-sectional low volatility (lottery demand; Bali, Cakici and Whitelaw, 2011): long the fifth with the lowest
-   60-day volatility, short the highest fifth, equal risk; at least 20 eligible. Counterparty: buyers who overpay
+   60-day volatility, short the highest fifth, equal risk; at least 10 eligible (as G1). Counterparty: buyers who overpay
    for lottery-like coins.
 Check (not a variant): SW10 in a book of three rows at 4% across all 50 perps, core four first, against the core
 four alone, October 2020 on, marked to market.
@@ -45,7 +46,7 @@ def book_ls(syms: list[str], score: str, shuffle: bool = False, mult: float = 1.
         if i < 1:
             continue
         t = idx[i - 1]; s = sc.loc[t].dropna()
-        if len(s) < 20:
+        if len(s) < 10:  # amended before any result: 20 within a half of the universe is never reached before 2024
             W.iloc[i] = 0.0; continue
         order = list(s.sort_values(ascending=False).index)
         if shuffle:
