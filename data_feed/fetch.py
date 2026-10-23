@@ -7,14 +7,19 @@ live/      crypto 15m, 1h, 4h, 1d (Binance spot via data-api.binance.vision, Coi
            stock perp underlyings 1h and 1d (Yahoo), refreshed every run.
 research/  daily history since listing for the Bitunix stock, ETF, index, volatility and commodity universe
            (Yahoo, split and dividend adjusted), plus 1h for two years on the liquid core. Refreshed daily.
+           research/perps: Binance USD-M funding (8h) and perp daily bars from data.binance.vision monthly
+           archives, 2020 on, for PERPS below (complete months; kept incrementally).
 
 Usage: python fetch.py OUT_DIR [--research]
 """
 from __future__ import annotations
 
+import io
 import json
 import sys
 import time
+import zipfile
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -37,6 +42,12 @@ COMMOD = ["CL=F", "BZ=F", "GC=F", "SI=F", "HG=F", "NG=F", "PL=F", "PA=F"]
 ASIA = ["005930.KS", "000660.KS", "0700.HK", "1810.HK", "1211.HK", "3690.HK", "9988.HK"]
 CORE_1H = """SPY QQQ IWM SMH NVDA TSLA AAPL MSFT AMZN META GOOGL AMD AVGO MSTR COIN PLTR NFLX MU TSM ORCL HOOD
 UVXY TQQQ SOXL""".split()
+
+# Binance USD-M perps for funding research (research/perps): long-lived, plus delisted ones to limit survivorship
+PERPS = """BTC ETH BNB XRP ADA DOGE SOL DOT AVAX LINK LTC NEAR INJ FET RUNE SUI TAO ATOM ETC BCH TRX UNI AAVE FIL XLM
+EOS ALGO VET THETA SAND MANA AXS APE OP ARB APT MATIC POL WLD TIA SEI 1000PEPE 1000SHIB ENA WIF ONDO HYPE LUNA FTT
+SRM""".split()
+BV = "https://data.binance.vision/data/futures/um/monthly/"
 
 S = requests.Session()
 S.headers["User-Agent"] = "Mozilla/5.0 (bitunix-sleeve data feed)"
@@ -170,6 +181,60 @@ def research(out: Path, manifest: dict) -> None:
         manifest["research_hourly"][t] = [str(d.index[0]), str(d.index[-1]), len(d)]
 
 
+def _zip_rows(url: str) -> list[list[str]] | None:
+    """Rows of the single CSV inside a Binance public-data zip; header lines dropped. None if missing."""
+    try:
+        r = S.get(url, timeout=30)
+    except requests.RequestException:
+        return None
+    if r.status_code != 200:
+        return None
+    try:
+        with zipfile.ZipFile(io.BytesIO(r.content)) as z:
+            txt = z.read(z.namelist()[0]).decode()
+    except (zipfile.BadZipFile, IndexError):
+        return None
+    return [ln.split(",") for ln in txt.splitlines() if ln[:1].isdigit()]
+
+
+def _ms(x: str) -> int:
+    v = int(float(x))
+    return v // 1000 if v > 10 ** 14 else v  # microsecond stamps in newer files
+
+
+def perp_research(out: Path, manifest: dict, budget_s: int = 900) -> None:
+    """Funding (8h) and perp daily bars from Binance's public monthly archives, kept incrementally."""
+    t0 = time.time(); d0 = out / "research" / "perps"; d0.mkdir(parents=True, exist_ok=True)
+    last = pd.Timestamp.now(tz="UTC").tz_localize(None).to_period("M") - 1
+    months = pd.period_range("2020-01", last, freq="M"); manifest["perps"] = manifest.get("perps", {})
+    for sym in PERPS:
+        if time.time() - t0 > budget_s:
+            manifest["perps_note"] = "time budget reached"; break
+        s, fpath, kpath = f"{sym}USDT", d0 / f"{sym}_funding.csv.gz", d0 / f"{sym}_1d.csv.gz"
+        oldf = pd.read_csv(fpath, index_col=0, parse_dates=True) if fpath.exists() else None
+        oldk = pd.read_csv(kpath, index_col=0, parse_dates=True) if kpath.exists() else None
+        start = months[0] if oldf is None or oldf.empty else max(months[0], oldf.index[-1].to_period("M"))
+        todo = [m for m in months if m >= start]
+        with ThreadPoolExecutor(16) as ex:
+            rf = list(ex.map(_zip_rows, [f"{BV}fundingRate/{s}/{s}-fundingRate-{m}.zip" for m in todo]))
+            rk = list(ex.map(_zip_rows, [f"{BV}klines/{s}/1d/{s}-1d-{m}.zip" for m in todo]))
+        fr = [r for rows in rf if rows for r in rows]; kr = [r for rows in rk if rows for r in rows]
+        if fr:
+            f = pd.DataFrame({"rate": [float(r[-1]) for r in fr]}, index=pd.to_datetime([_ms(r[0]) for r in fr], unit="ms"))
+            if oldf is not None:
+                f = pd.concat([oldf[~oldf.index.isin(f.index)], f])
+            f = f[~f.index.duplicated()].sort_index(); f.index.name = "t"; f.to_csv(fpath, float_format="%.8g")
+        if kr:
+            k = pd.DataFrame([[float(x) for x in r[1:6]] + [float(r[7]), float(r[9])] for r in kr],
+                             columns=["o", "h", "l", "c", "v", "qv", "taker_buy_v"], index=pd.to_datetime([_ms(r[0]) for r in kr], unit="ms"))
+            if oldk is not None:
+                k = pd.concat([oldk[~oldk.index.isin(k.index)], k])
+            k = k[~k.index.duplicated()].sort_index(); k.index.name = "t"; k.to_csv(kpath, float_format="%.10g")
+        if fpath.exists() and kpath.exists():
+            ff = pd.read_csv(fpath, index_col=0, parse_dates=True)
+            manifest["perps"][sym] = [str(ff.index[0]), str(ff.index[-1]), len(ff)]
+
+
 def main(argv: list[str]) -> None:
     out = Path(argv[1]); out.mkdir(parents=True, exist_ok=True)
     mpath = out / "manifest.json"
@@ -183,6 +248,10 @@ def main(argv: list[str]) -> None:
         manifest["research_daily"], manifest["research_hourly"] = {}, {}
         research(out, manifest)
         manifest["research_updated_utc"] = manifest["updated_utc"]
+        try:
+            perp_research(out, manifest)
+        except Exception as e:  # never let the perp archive break the feed
+            manifest["perps_error"] = f"{type(e).__name__}: {e}"[:200]
     mpath.write_text(json.dumps(manifest, indent=1, sort_keys=True))
     print(json.dumps({k: (len(v) if isinstance(v, (dict, list)) else v) for k, v in manifest.items()}))
 
