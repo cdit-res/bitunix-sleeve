@@ -2,6 +2,18 @@
 
 Engine for the scheduled trade runs, and the research behind its rules.
 
+## swing.py (from 23 October 2026)
+
+The 08:30 run's book: $100 start, isolated margin, leverage read off the stop. `python swing.py state.csv --equity 100`.
+
+| Book | Rule | Risk a row | Universe |
+|---|---|---|---|
+| MAX-10 | Long after a 10-day closing high, 1 daily ATR stop, exit next run unless it repeats | 4% | BTC, ETH, SOL, XRP (tested), INJ (untested) |
+| Trend | 20, 60 and 150-day closing highs, midpoint stop trailed daily; new signals only | 2% a slice | crypto, eight commodities, 12 ETFs, 20 most traded Bitunix stocks |
+| Levels | 4h tested levels from `engine.py scan --crypto-only` | 2%, two rows at most | crypto |
+
+Caps: 40% open, 15% per correlated group; MAX-10 takes budget first, then trend by how many lookbacks agree.
+
 ## engine.py
 
 Reads the repo's own data feed (the `data` branch, below) and falls back to static-klines for crypto if the feed is missing. A run:
