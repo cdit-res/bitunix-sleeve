@@ -82,6 +82,8 @@ Each script's header records its settings, fixed before it was run.
 | swing_batch5.py | SW10's rule on weekly bars: crypto, index ETFs, commodities | Crypto beats its placebo in every set (median stop 15%, about 3x) but has too few trades for t 3: watch. ETFs and commodities fail |
 | swing_funding.py | Funding carry across 50 perps; SW10 with a funding filter; SW10 at actual funding | Carry fails once dead delisted contracts are excluded (the first run's pass was that bug); the filter fails; SW10 holds at actual funding |
 | swing_perps_fresh.py | SW10 on 40 further perps, delisted included | Supports SW10: +0.19R a trade (t 4.3) against +0.06R for its placebo; beats it on 33 of 40 coins |
+| swing_batch6.py | Cross-sectional momentum and low volatility on 50 perps; SW10 book across all 50 | Both fail; the 50-coin SW10 book wiped out at 4% a row (-100%), so the live book stays on the majors |
+| swing_resting.py | SW10 with resting buy-stop entries or resting sell-stop exits (hourly fills) | Both worse than entering and exiting at the 08:30 run after the daily close |
 | fetch_data.py | Rebuilds `data/` from the public sources | |
 
 Rules for any change: net of fees, t of 3 or more, the same sign in both halves, a held-out period run once, fresh symbols, and a placebo the signal must beat. Count every variant tried. The full record is research/LEDGER.md and research/PROGRAMME.md.

@@ -108,3 +108,9 @@ Where the search stands after 21 swing and position tests: one adopted rule (SW1
 
 The data feed now publishes Binance USD-M funding and perp daily bars for 50 perps from 2020 (research/perps). Cross-sectional funding carry first passed, then failed once a data bug was fixed: delisted FTT and SRM kept posting prices and default funding after trading stopped, and their near-zero volatility gave them maximum weight. A coin now counts only on days it trades. Lesson kept: check any spectacular result for dead or stale rows before anything else. The SW10 funding filter fails. SW10 survives the funding actually posted, and holds on 40 further perps (SW24), so the live rule's evidence now spans 57 coins.
 
+## Batch 6 and execution, 23 October 2026
+
+Cross-sectional momentum and low volatility across 50 perps fail (SW25). SW10 spread across all 50 perps wipes out at 4% a row, so the book stays on the majors. Resting buy-stops at the breakout level and resting sell-stops at the three-close low both do worse than acting at the 08:30 run after the daily close (SW26).
+
+Count for the day: 28 swing and position tests and checks, one adopted rule (SW10), one bug caught (dead contracts in the funding data). The daily price and funding data for this universe are close to exhausted for new rules. What could still add: a live record for SW10 and the weekly version (SW19), Bitunix funding on the leveraged-ETF perps (SW15), and data types not yet in the feed (open interest, options).
+

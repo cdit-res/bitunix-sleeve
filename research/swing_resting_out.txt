@@ -1,0 +1,27 @@
+base: all n 1045, mean +0.144R, t +1.98; core n 433, mean +0.196R, t +1.75; capped book about +13.7R a year
+   2022: n 179, mean -0.009R, t -0.05
+   2023: n 249, mean +0.405R, t +2.64
+   2024: n 241, mean +0.296R, t +1.58
+   2025: n 212, mean -0.127R, t -1.23
+   2026: n 164, mean +0.044R, t +0.27
+h1a: all n 1508, mean +0.085R, t +1.49; core n 615, mean +0.180R, t +1.95; capped book about +4.4R a year
+   2022: n 257, mean -0.085R, t -0.62
+   2023: n 387, mean +0.204R, t +1.76
+   2024: n 334, mean +0.291R, t +2.07
+   2025: n 306, mean -0.121R, t -1.42
+   2026: n 224, mean +0.046R, t +0.30
+h1a_placebo: all n 2783, mean +0.012R, t +0.35; core n 1130, mean +0.067R, t +1.21; capped book about -2.5R a year
+   2022: n 546, mean -0.146R, t -2.35
+   2023: n 611, mean +0.138R, t +1.76
+   2024: n 567, mean +0.226R, t +2.25
+   2025: n 588, mean -0.101R, t -1.86
+   2026: n 471, mean -0.083R, t -1.03
+h1b: all n 1497, mean -0.003R, t -0.08; core n 620, mean +0.046R, t +0.63; capped book about -0.3R a year
+   2022: n 256, mean -0.095R, t -0.87
+   2023: n 378, mean +0.056R, t +0.65
+   2024: n 359, mean +0.065R, t +0.61
+   2025: n 279, mean -0.079R, t -1.16
+   2026: n 225, mean -0.014R, t -0.14
+
+H1a minus baseline: -0.060R a trade; H1a minus its placebo +0.073R
+H1b minus baseline: -0.148R a trade

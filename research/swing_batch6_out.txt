@@ -1,0 +1,16 @@
+G1 cross-sectional momentum, 50 perps
+  G1, A: design SR +0.95 t +1.68 (3.1y) [halves SR +0.75 t +0.94 (1.6y) / SR +1.28 t +1.60 (1.6y)]; held-out SR +0.58 t +0.97 (2.7y)
+    fresh B: SR +0.20 t +0.51 (6.2y)
+    placebo: real +0.79bp a day vs 95th percentile +0.45bp
+    double costs (design): SR +0.86 t +1.52 (3.1y)
+  GATE G1: FAIL (design t >= 3; double costs t >= 2)
+G2 cross-sectional low volatility, 50 perps
+  G2, A: design SR -0.26 t -0.47 (3.1y) [halves SR +0.40 t +0.49 (1.6y) / SR -1.07 t -1.33 (1.6y)]; held-out SR +0.41 t +0.68 (2.7y)
+    fresh B: SR +1.12 t +2.77 (6.2y)
+    placebo: real -0.03bp a day vs 95th percentile +0.49bp
+    double costs (design): SR -0.29 t -0.52 (3.1y)
+  GATE G2: FAIL (design t >= 3; both halves positive; placebo beaten; double costs t >= 2)
+Check: SW10 book, three rows at 4%, core four first
+    4 coins: +25.8R a year, daily SR 1.14, worst drawdown -75%; 2020 +48.8R, 2021 +41.0R, 2022 -8.3R, 2023 +42.5R, 2024 +28.6R, 2025 -4.0R, 2026 +7.8R
+    50 coins: +28.2R a year, daily SR 0.82, worst drawdown -100%; 2020 +49.5R, 2021 +141.3R, 2022 -33.1R, 2023 +18.9R, 2024 -19.1R, 2025 -29.8R, 2026 +42.9R
+PASSED: none

@@ -262,6 +262,12 @@ ENTRIES: list[dict] = [
     dict(id="SW24", date="2026-10-23", family="swing momentum", hypothesis="SW10 on 40 further Binance perps, delisted coins included while they traded, funding as posted (F5, fresh evidence)", instruments="40 perps 2020 on", timeframe="daily", hold="days",
          design="n/a", held_out="n/a", fresh="+0.187R (t 4.30, n 3711) against placebo +0.055R", verdict="supports SW10", script="swing_perps_fresh.py",
          notes="Beats its placebo on 33 of 40 coins; delisted coins +0.207R; 2022 -0.12R and 2025 -0.23R a trade, as on the majors"),
+    dict(id="SW25", date="2026-10-23", family="cross-section", hypothesis="Cross-sectional momentum (G1) and low volatility (G2) on 50 perps, weekly, funding as posted", instruments="50 perps 2020 on; halves A and B", timeframe="daily", hold="week",
+         design="G1 SR +0.95 (t 1.68); G2 SR -0.26", held_out="G1 SR +0.58; G2 SR +0.41", fresh="G1 SR +0.20; G2 SR +1.12", verdict="fail", script="swing_batch6.py",
+         notes="Book check: SW10 across all 50 perps at three rows of 4% made +28.2R a year but wiped out (worst drawdown -100%, SR 0.82) against the core four's -75% and SR 1.14: the live book stays on the majors"),
+    dict(id="SW26", date="2026-10-23", family="execution", hypothesis="SW10 with a resting buy-stop at the ten-close high (H1a) or a resting sell-stop at the three-close low (H1b), hourly fills", instruments="ten coins, 2022 on", timeframe="1h fills", hold="days",
+         design="baseline (08:00 fills) +0.144R a trade, about +13.7R a year capped", held_out="H1a +0.085R, about +4.4R a year", fresh="H1b -0.003R", verdict="fail: keep close-based entries and exits", script="swing_resting.py",
+         notes="Resting buy-stops catch false breakouts; intraday sell-stops get shaken out. Entering and exiting at the 08:30 run after the daily close is better"),
 ]
 
 
