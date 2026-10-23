@@ -94,3 +94,7 @@ What this adds to the record: on perps, any hold of weeks pays funding on the wh
 
 SW10 keeps MAX-10's entry and replaces the one-day exit. Checks before promotion (swing_b3_checks.py): beats its placebo in every BTC regime and volatility state; every exit setting from two to five closes and five to twenty days beats its placebo in every set; filled at 08:00 UTC it keeps +0.14R over placebo (2022 on); in a book capped at three rows of 4% it made +25.8R a year with a daily Sharpe of 1.14, against +12.1R and 0.73 for the one-day hold, with a worst drawdown of -75% at 4% a row (-45% at 2%). Weak spot: 2025 (-0.07R a trade, -4.0R for the capped book) and the paper month since 28 September (three trades, -3.25R).
 
+## Swing batch 4, 23 October 2026
+
+Nothing adopted. The volume filter (SW16) and pyramid add-ons (SW18) improve the average trade but not the capped book. The short mirror of SW10 fails (SW17), so the book has no bear-market counterpart. Leveraged-ETF structures (SW14, SW15) fail at the assumed funding; the hedge against L x the underlying earns gross, but adjusted closes credit the long leg with dividends and coupons a perp does not pay, so it stays a lead until Bitunix funding on QQQ, TQQQ, TLT and TMF is known.
+

@@ -231,6 +231,21 @@ ENTRIES: list[dict] = [
     dict(id="SW13", date="2026-10-23", family="swing momentum", hypothesis="SW10 rule on index ETFs", instruments="SPY, QQQ; fresh 12 ETFs", timeframe="daily", hold="days",
          design="-0.185R (t -4.28)", held_out="+0.110R (t 1.47)", fresh="-0.097R (t -4.83)", verdict="fail", script="swing_batch3.py",
          notes="Short-horizon continuation is a crypto effect; equities mean-revert at this horizon"),
+    dict(id="SW14", date="2026-10-23", family="structural", hypothesis="Short both TQQQ and SQQQ, equal notional, weekly (D1)", instruments="TQQQ, SQQQ; fresh SOXL, SOXS", timeframe="daily", hold="weekly reset",
+         design="-3.8% a year (t -2.59)", held_out="-1.9% a year (t -1.05)", fresh="+1.6% a year (t 0.62)", verdict="fail", script="swing_batch4.py",
+         notes="Gross of perp costs +1.5% a year (t 1.23): weekly rebalancing leaves little decay to harvest"),
+    dict(id="SW15", date="2026-10-23", family="structural", hypothesis="Short a leveraged ETF, long L x its underlying, weekly (D2)", instruments="TQQQ/QQQ; fresh SOXL/SMH, TMF/TLT, KORU/EWY, NVDL/NVDA, TSLL/TSLA", timeframe="daily", hold="weekly reset",
+         design="-15.0% a year net (t -10.37)", held_out="-7.0% a year net", fresh="four of five negative net", verdict="fail at the assumed funding; lead only", script="swing_batch4.py",
+         notes="Gross of perp costs TQQQ/QQQ +5.7% a year (t 5.31; held-out +9.0%), but adjusted closes credit the long leg with dividends and coupons a perp does not pay, and the result turns on Bitunix funding for these contracts, which is unknown"),
+    dict(id="SW16", date="2026-10-23", family="swing momentum", hypothesis="SW10 only when signal-day volume is above its 20-day mean (D3)", instruments="as SW10", timeframe="daily", hold="days",
+         design="+0.571R (t 3.63) against +0.454R unfiltered", held_out="+0.374R against +0.302R", fresh="+0.435R against +0.398R", verdict="passes the trade gate; not adopted", script="swing_batch4.py, swing_batch4_checks.py",
+         notes="Fewer trades for the same or less total R; capped book: core four SR 1.25 against 1.14 but the same R a year and a deeper drawdown; ten coins worse"),
+    dict(id="SW17", date="2026-10-23", family="swing momentum", hypothesis="Short mirror of SW10 (D4a always; D4b in a BTC downtrend)", instruments="as SW10", timeframe="daily", hold="days",
+         design="+0.064R (t 0.92); D4b +0.157R (t 1.67)", held_out="+0.010R; D4b +0.108R", fresh="-0.005R; D4b +0.028R", verdict="fail", script="swing_batch4.py",
+         notes="No bear-market counterpart to SW10"),
+    dict(id="SW18", date="2026-10-23", family="swing momentum", hypothesis="Pyramid: add a unit on each new MAX-10 signal inside an open SW10 position (D5)", instruments="as SW10", timeframe="daily", hold="days",
+         design="+0.758R (t 6.48)", held_out="+0.318R (t 2.04)", fresh="+0.304R (t 4.33); +0.012R over placebo add-ons", verdict="passes the trade gate; not adopted", script="swing_batch4.py, swing_batch4_checks.py",
+         notes="Random add-ons inside open positions do almost as well on fresh coins: the gain is from being in a trend, not the add-on signal. Capped book: core four +44.1R a year (SR 1.26, worst drawdown -84%) but ten coins SR 0.79 with a -98% drawdown"),
 ]
 
 

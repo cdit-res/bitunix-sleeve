@@ -1,0 +1,13 @@
+Book, three rows at most, 4% each, core four, Oct 2020 on
+  SW10 as live: +25.8R a year, daily SR 1.14, worst drawdown -75%, x53.9; by year 2020 +48.8R, 2021 +41.0R, 2022 -8.3R, 2023 +42.5R, 2024 +28.6R, 2025 -4.0R, 2026 +7.8R
+  D3 as a filter: +25.8R a year, daily SR 1.25, worst drawdown -78%, x78.4; by year 2020 +45.3R, 2021 +53.0R, 2022 -2.7R, 2023 +42.6R, 2024 +25.4R, 2025 -4.7R, 2026 -2.3R
+  D3 as a priority: +24.7R a year, daily SR 1.09, worst drawdown -76%, x39.9; by year 2020 +48.8R, 2021 +35.0R, 2022 -8.3R, 2023 +42.4R, 2024 +28.6R, 2025 -4.7R, 2026 +7.5R
+  D5 add-ons: +44.1R a year, daily SR 1.26, worst drawdown -84%, x511.0; by year 2020 +127.6R, 2021 +71.3R, 2022 -21.8R, 2023 +41.1R, 2024 +47.8R, 2025 -3.8R, 2026 +4.9R
+  D5 add-ons with D3 priority: +43.1R a year, daily SR 1.23, worst drawdown -86%, x390.6; by year 2020 +127.6R, 2021 +68.3R, 2022 -20.8R, 2023 +40.5R, 2024 +47.8R, 2025 -6.6R, 2026 +4.7R
+Book, three rows at most, 4% each, core four plus fresh six, Oct 2020 on
+  SW10 as live: +32.5R a year, daily SR 1.20, worst drawdown -85%, x103.2; by year 2020 +48.4R, 2021 +102.0R, 2022 -9.7R, 2023 +30.4R, 2024 +24.7R, 2025 -10.9R, 2026 +11.8R
+  D3 as a filter: +30.1R a year, daily SR 1.16, worst drawdown -87%, x73.2; by year 2020 +44.7R, 2021 +104.8R, 2022 -13.2R, 2023 +29.5R, 2024 +25.2R, 2025 -16.2R, 2026 +7.8R
+  D3 as a priority: +33.2R a year, daily SR 1.20, worst drawdown -87%, x104.9; by year 2020 +48.1R, 2021 +108.5R, 2022 -17.8R, 2023 +27.0R, 2024 +29.1R, 2025 -5.3R, 2026 +11.6R
+  D5 add-ons: +28.9R a year, daily SR 0.79, worst drawdown -98%, x7.1; by year 2020 +122.5R, 2021 +59.3R, 2022 -31.5R, 2023 +29.0R, 2024 +16.3R, 2025 -19.2R, 2026 -1.2R
+  D5 add-ons with D3 priority: +28.8R a year, daily SR 0.77, worst drawdown -98%, x5.5; by year 2020 +122.5R, 2021 +61.3R, 2022 -32.8R, 2023 +27.7R, 2024 +20.1R, 2025 -21.1R, 2026 -3.1R
+

@@ -1,0 +1,48 @@
+D1 short both TQQQ and SQQQ, equal notional, weekly
+    gross of perp costs: full annual +1.5%, SR +0.30, t +1.23; held-out annual +2.3%, SR +0.42, t +1.31
+  D1: design annual -3.8%, SR -0.99, t -2.59 [halves annual -3.5%, SR -0.76, t -1.40 / annual -4.1%, SR -1.41, t -2.61]; held-out annual -1.9%, SR -0.34, t -1.05
+    fresh: SOXL and SOXS annual +1.6%, SR +0.15, t +0.62
+    double costs (design): annual -7.9%, SR -2.03, t -5.33
+  GATE D1: FAIL (design t >= 3; both halves positive; held-out positive; double costs t >= 2)
+
+D2 short a leveraged ETF, long L x its underlying, weekly
+    gross of perp costs: full annual +5.7%, SR +1.30, t +5.31; held-out annual +9.0%, SR +1.90, t +5.95
+      SOXL/SMH gross annual +11.3%, SR +0.60, t +2.45
+      TMF/TLT gross annual +6.1%, SR +1.44, t +6.01
+      KORU/EWY gross annual +8.8%, SR +0.49, t +1.81
+      NVDL/NVDA gross annual +29.5%, SR +1.95, t +3.82
+      TSLL/TSLA gross annual +4.7%, SR +0.25, t +0.52
+  D2: design annual -15.0%, SR -3.95, t -10.37 [halves annual -15.2%, SR -3.25, t -6.03 / annual -14.8%, SR -5.59, t -10.39]; held-out annual -7.0%, SR -1.45, t -4.55
+    fresh: SOXL/SMH annual -5.0%, SR -0.27, t -1.08; TMF/TLT annual -9.7%, SR -2.26, t -9.44; KORU/EWY annual -7.3%, SR -0.41, t -1.49; NVDL/NVDA annual +17.0%, SR +1.12, t +2.19; TSLL/TSLA annual -8.0%, SR -0.43, t -0.87
+    double costs (design): annual -30.9%, SR -7.75, t -20.34
+  GATE D2: FAIL (design t >= 3; both halves positive; held-out positive; fresh positive; double costs t >= 2)
+
+D3 SW10 with signal-day volume above its 20-day mean
+  D3 volume filter: design n 356, mean +0.571R, t +3.63 [halves n 140, mean +0.536R, t +2.30 / n 216, mean +0.594R, t +2.81]; held-out n 178, mean +0.374R, t +1.61
+    unfiltered SW10: design n 462, mean +0.454R, t +3.59; held-out n 233, mean +0.302R, t +1.64; fresh n 906, mean +0.398R, t +4.12
+    fresh: n 742, mean +0.435R, t +3.87; minus unfiltered SW10: design +0.117R, held-out +0.073R, fresh +0.036R
+    double costs (design): n 356, mean +0.513R, t +3.27
+  GATE D3 volume filter: PASS (all checks met)
+    placebo on high-volume days: signal minus placebo design +0.325R, held-out +0.237R, fresh +0.269R
+
+D4 short mirror of SW10
+  D4a always: design n 426, mean +0.064R, t +0.92 [halves n 173, mean +0.158R, t +1.26 / n 253, mean -0.001R, t -0.01]; held-out n 237, mean +0.010R, t +0.11
+    placebo: design n 7882, mean -0.045R, t -3.32; held-out n 4096, mean -0.076R, t -4.49; fresh n 16222, mean -0.046R, t -5.29
+    fresh: n 954, mean -0.005R, t -0.13; minus placebo: design +0.109R, held-out +0.085R, fresh +0.041R
+    double costs (design): n 426, mean +0.038R, t +0.55
+  GATE D4a always: FAIL (design t >= 3; both halves positive; fresh positive; double costs t >= 2)
+  D4b BTC downtrend only: design n 279, mean +0.157R, t +1.67 [halves n 102, mean +0.401R, t +2.05 / n 177, mean +0.017R, t +0.18]; held-out n 136, mean +0.108R, t +0.85
+    placebo: design n 3577, mean +0.048R, t +2.24; held-out n 1672, mean +0.015R, t +0.51; fresh n 6987, mean +0.034R, t +2.33
+    fresh: n 593, mean +0.028R, t +0.51; minus placebo: design +0.109R, held-out +0.093R, fresh -0.006R
+    double costs (design): n 279, mean +0.132R, t +1.40
+  GATE D4b BTC downtrend only: FAIL (design t >= 3; placebo beaten; double costs t >= 2)
+
+D5 pyramid add-ons inside open SW10 positions
+  D5 add-ons: design n 831, mean +0.758R, t +6.48 [halves n 322, mean +0.568R, t +3.85 / n 509, mean +0.878R, t +5.27]; held-out n 401, mean +0.318R, t +2.04
+    placebo add-ons: design n 1644, mean +0.501R, t +7.09; held-out n 817, mean +0.155R, t +1.66; fresh n 3158, mean +0.292R, t +6.04
+    fresh: n 1589, mean +0.304R, t +4.33; minus placebo add-ons: design +0.257R, held-out +0.163R, fresh +0.012R
+    double costs (design): n 831, mean +0.700R, t +6.01
+  GATE D5 add-ons: PASS (all checks met)
+
+PASSED: D3 vs SW10, D5
+

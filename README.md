@@ -77,6 +77,8 @@ Each script's header records its settings, fixed before it was run.
 | swing_b3_checks.py | Disproof of B3: years, coins, regimes, fills at 08:00 UTC, exit settings, a capped book marked to market | Holds: beats placebo in every regime and at every exit setting; 08:00 UTC fills keep +0.14R over placebo; capped book +25.8R a year against +12.1R for the one-day hold |
 | swing_exec_compare.py | MAX-10's one-day hold filled at 08:00 UTC | Keeps its edge: +0.064R over placebo against +0.069R at the close |
 | swing_batch3.py | B3 on the feed's other coins, commodities and index ETFs | Holds on six of seven extra coins (+0.24R, t 2.5); fails on commodities and ETFs: a crypto effect |
+| swing_batch4.py | Batch 4: short both legs of TQQQ/SQQQ; short a leveraged ETF against L x its underlying; SW10 with a volume filter; the short mirror of SW10; pyramid add-ons | Structural trades fail at the assumed funding (the hedge earns gross, but the long leg's adjusted returns include dividends and coupons); shorts fail; the volume filter and add-ons pass the trade gate |
+| swing_batch4_checks.py | The volume filter and add-ons in the capped book | Not adopted: the volume filter keeps R a year flat and deepens the drawdown; add-ons help four coins but wreck the ten-coin book (-98% drawdown) |
 | fetch_data.py | Rebuilds `data/` from the public sources | |
 
 Rules for any change: net of fees, t of 3 or more, the same sign in both halves, a held-out period run once, fresh symbols, and a placebo the signal must beat. Count every variant tried. The full record is research/LEDGER.md and research/PROGRAMME.md.
