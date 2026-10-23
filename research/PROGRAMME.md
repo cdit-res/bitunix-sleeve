@@ -104,3 +104,7 @@ SW10's rule on weekly bars (SW19 to SW21). Crypto beats its placebo in every set
 
 Where the search stands after 21 swing and position tests: one adopted rule (SW10), two refinements that improve the trade but not the book, and one weekly candidate short of power. The public daily price data for this universe looks close to exhausted; what could add more is data not yet in hand: Bitunix funding on the leveraged-ETF and index perps (SW15), and a live record for SW19.
 
+## Funding batch, 23 October 2026
+
+The data feed now publishes Binance USD-M funding and perp daily bars for 50 perps from 2020 (research/perps). Cross-sectional funding carry first passed, then failed once a data bug was fixed: delisted FTT and SRM kept posting prices and default funding after trading stopped, and their near-zero volatility gave them maximum weight. A coin now counts only on days it trades. Lesson kept: check any spectacular result for dead or stale rows before anything else. The SW10 funding filter fails. SW10 survives the funding actually posted, and holds on 40 further perps (SW24), so the live rule's evidence now spans 57 coins.
+

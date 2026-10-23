@@ -1,0 +1,19 @@
+perps in the feed: 50: 1000PEPE, 1000SHIB, AAVE, ADA, ALGO, APE, APT, ARB, ATOM, AVAX, AXS, BCH, BNB, BTC, DOGE, DOT, ENA, EOS, ETC, ETH, FET, FIL, FTT, HYPE, INJ, LINK, LTC, LUNA, MANA, MATIC, NEAR, ONDO, OP, POL, RUNE, SAND, SEI, SOL, SRM, SUI, TAO, THETA, TIA, TRX, UNI, VET, WIF, WLD, XLM, XRP
+F1 cross-sectional funding carry, weekly
+  universe A (25): design SR +0.32 t +0.56 (3.1y) [halves SR +1.03 t +1.30 (1.6y) / SR -0.57 t -0.71 (1.6y)]; held-out SR +1.07 t +1.77 (2.7y)
+    components, full: price SR +0.35 t +0.86 (5.9y); funding SR +7.41 t +18.00 (5.9y)
+  fresh universe B (25): SR +0.28 t +0.70 (6.4y)
+  placebo: real mean +0.45bp a day vs 95th percentile of random ranks +0.31bp
+  double costs (design): SR +0.21 t +0.37 (3.1y)
+  GATE F1: FAIL (design t >= 3; both halves positive; double costs t >= 2)
+F2 SW10 skipping crowded-funding signals
+  F2 filtered, core: design n 241, mean +0.582R, t +2.88 [halves n 111, mean +1.008R, t +2.62 / n 130, mean +0.219R, t +1.24]; held-out n 195, mean +0.365R, t +1.73
+  SW10 unfiltered, core: design n 325, mean +0.460R, t +2.87 [halves n 155, mean +0.751R, t +2.59 / n 170, mean +0.195R, t +1.26]; held-out n 233, mean +0.302R, t +1.64
+    fresh: filtered n 580, mean +0.357R, t +3.15; unfiltered n 751, mean +0.382R, t +3.44
+  GATE F2: FAIL (design t >= 3; placebo beaten)
+F3 SW10 charged actual funding (2020 on)
+  core: flat 0.03% a day n 558, mean +0.394R, t +3.26; actual funding n 558, mean +0.377R, t +3.14
+  fresh: flat 0.03% a day n 751, mean +0.382R, t +3.44; actual funding n 751, mean +0.376R, t +3.39
+F4 seven-day mean funding against the next seven days' return (pooled, weekly, rank correlation)
+  mean rank correlation -0.028 (t -2.59, 340 weeks)
+PASSED: none

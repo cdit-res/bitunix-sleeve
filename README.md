@@ -36,7 +36,7 @@ python engine.py html brief.json
 
 ## data_feed/ and the `data` branch
 
-A GitHub Actions job (`.github/workflows/data.yml`) fetches public data every ten minutes, when GitHub runs it, and publishes to the `data` branch: Binance spot 15m, 1h, 4h and daily bars with taker volume for 18 coins; Yahoo 1h and daily bars for 24 stock perp underlyings and VIX; and, daily, Yahoo history since listing for 147 stocks, ETFs, indices and commodities (research). Never the Bitunix API.
+A GitHub Actions job (`.github/workflows/data.yml`) fetches public data every ten minutes, when GitHub runs it, and publishes to the `data` branch: Binance spot 15m, 1h, 4h and daily bars with taker volume for 18 coins; Yahoo 1h and daily bars for 24 stock perp underlyings and VIX; and, daily, Yahoo history since listing for 147 stocks, ETFs, indices and commodities, plus Binance USD-M funding and perp daily bars for 50 perps from 2020 (research/perps, from Binance's public monthly archives). Never the Bitunix API.
 
 ## research/
 
@@ -80,6 +80,8 @@ Each script's header records its settings, fixed before it was run.
 | swing_batch4.py | Batch 4: short both legs of TQQQ/SQQQ; short a leveraged ETF against L x its underlying; SW10 with a volume filter; the short mirror of SW10; pyramid add-ons | Structural trades fail at the assumed funding (the hedge earns gross, but the long leg's adjusted returns include dividends and coupons); shorts fail; the volume filter and add-ons pass the trade gate |
 | swing_batch4_checks.py | The volume filter and add-ons in the capped book | Not adopted: the volume filter keeps R a year flat and deepens the drawdown; add-ons help four coins but wreck the ten-coin book (-98% drawdown) |
 | swing_batch5.py | SW10's rule on weekly bars: crypto, index ETFs, commodities | Crypto beats its placebo in every set (median stop 15%, about 3x) but has too few trades for t 3: watch. ETFs and commodities fail |
+| swing_funding.py | Funding carry across 50 perps; SW10 with a funding filter; SW10 at actual funding | Carry fails once dead delisted contracts are excluded (the first run's pass was that bug); the filter fails; SW10 holds at actual funding |
+| swing_perps_fresh.py | SW10 on 40 further perps, delisted included | Supports SW10: +0.19R a trade (t 4.3) against +0.06R for its placebo; beats it on 33 of 40 coins |
 | fetch_data.py | Rebuilds `data/` from the public sources | |
 
 Rules for any change: net of fees, t of 3 or more, the same sign in both halves, a held-out period run once, fresh symbols, and a placebo the signal must beat. Count every variant tried. The full record is research/LEDGER.md and research/PROGRAMME.md.

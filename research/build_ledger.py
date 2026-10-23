@@ -253,6 +253,15 @@ ENTRIES: list[dict] = [
          design="-0.016R (t -0.16)", held_out="+0.213R (t 1.45)", fresh="+0.043R (t 1.00)", verdict="fail", script="swing_batch5.py", notes="No better than its placebo"),
     dict(id="SW21", date="2026-10-23", family="position momentum", hypothesis="Weekly SW10 on commodity futures (E3)", instruments="8 commodity futures", timeframe="weekly", hold="median 4 weeks",
          design="+0.074R (t 0.74)", held_out="+0.360R (t 2.28)", fresh="n/a", verdict="fail", script="swing_batch5.py", notes="Design no better than its placebo"),
+    dict(id="SW22", date="2026-10-23", family="carry", hypothesis="Cross-sectional funding carry: weekly, long the lowest third of seven-day funding, short the highest third, equal risk (F1)", instruments="50 Binance perps 2020 on; halves A (design, held-out) and B (fresh)", timeframe="daily", hold="week",
+         design="SR +0.32 (t 0.56)", held_out="SR +1.07 (t 1.77)", fresh="SR +0.28 (t 0.70)", verdict="fail", script="swing_funding.py",
+         notes="The first run passed (SR 2.9) on a data bug: delisted FTT and SRM kept posting prices and default funding, and near-zero volatility gave them maximum weight. Fixed by counting a coin only on days it trades. Funding income is steady (SR 7.4 alone) but price noise swamps it. Pooled weekly rank correlation of funding with next-week return -0.028 (t -2.59)"),
+    dict(id="SW23", date="2026-10-23", family="swing momentum", hypothesis="SW10 skipping signals whose seven-day funding is above the 80th percentile of the prior year (F2)", instruments="as SW10, 2020 on", timeframe="daily", hold="days",
+         design="+0.582R (t 2.88) against +0.460R unfiltered", held_out="+0.365R against +0.302R", fresh="+0.357R against +0.382R", verdict="fail", script="swing_funding.py",
+         notes="Worse on fresh coins. Diagnostic F3: SW10 charged the funding actually posted earns +0.377R (core) and +0.376R (fresh) against +0.394R and +0.382R at the flat 0.03% a day, so the live rule survives real funding"),
+    dict(id="SW24", date="2026-10-23", family="swing momentum", hypothesis="SW10 on 40 further Binance perps, delisted coins included while they traded, funding as posted (F5, fresh evidence)", instruments="40 perps 2020 on", timeframe="daily", hold="days",
+         design="n/a", held_out="n/a", fresh="+0.187R (t 4.30, n 3711) against placebo +0.055R", verdict="supports SW10", script="swing_perps_fresh.py",
+         notes="Beats its placebo on 33 of 40 coins; delisted coins +0.207R; 2022 -0.12R and 2025 -0.23R a trade, as on the majors"),
 ]
 
 

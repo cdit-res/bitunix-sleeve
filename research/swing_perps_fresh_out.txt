@@ -1,0 +1,50 @@
+F5 SW10 on 40 further perps (2020 on): signal n 3711, mean +0.187R, t +4.30; placebo n 64543, mean +0.055R, t +7.46; difference +0.132R
+  coins where the signal beats its placebo: 33 of 40
+  2020: signal n 218, mean +0.211R, t +1.17; placebo n 3527, mean +0.150R, t +4.61
+  2021: signal n 486, mean +0.557R, t +3.75; placebo n 7697, mean +0.255R, t +10.13
+  2022: signal n 409, mean -0.120R, t -1.88; placebo n 8540, mean -0.114R, t -9.64
+  2023: signal n 658, mean +0.202R, t +1.82; placebo n 10097, mean +0.122R, t +6.37
+  2024: signal n 718, mean +0.434R, t +3.40; placebo n 12472, mean +0.165R, t +7.08
+  2025: signal n 687, mean -0.233R, t -4.14; placebo n 12746, mean -0.119R, t -11.25
+  2026: signal n 535, mean +0.263R, t +2.54; placebo n 9464, mean +0.026R, t +1.61
+  delisted or renamed (FTT, LUNA, MATIC, SRM): signal n 162, mean +0.207R, t +1.29; placebo n 2819, mean +0.084R, t +2.70
+    1000PEPE: n 62, mean +1.170R, t +1.49; placebo mean +0.329R
+    1000SHIB: n 98, mean +0.628R, t +1.45; placebo mean +0.180R
+    AAVE: n 131, mean +0.064R, t +0.47; placebo mean +0.015R
+    ALGO: n 138, mean +0.069R, t +0.35; placebo mean +0.038R
+    APE: n 94, mean -0.200R, t -1.51; placebo mean -0.115R
+    APT: n 75, mean +0.131R, t +0.54; placebo mean -0.044R
+    ARB: n 64, mean +0.105R, t +0.57; placebo mean -0.057R
+    ATOM: n 150, mean -0.164R, t -1.36; placebo mean -0.031R
+    AXS: n 119, mean +0.418R, t +1.23; placebo mean +0.087R
+    BCH: n 141, mean +0.245R, t +0.74; placebo mean +0.055R
+    ENA: n 49, mean +0.335R, t +1.14; placebo mean +0.064R
+    EOS: n 115, mean +0.021R, t +0.14; placebo mean -0.035R
+    ETC: n 128, mean +0.202R, t +0.92; placebo mean +0.069R
+    FET: n 77, mean +0.276R, t +0.88; placebo mean -0.035R
+    FIL: n 107, mean +0.215R, t +0.94; placebo mean +0.082R
+    FTT: n 9, mean -0.481R, t -2.72; placebo mean -0.227R
+    HYPE: n 26, mean +0.323R, t +0.75; placebo mean +0.210R
+    INJ: n 94, mean +0.356R, t +1.27; placebo mean +0.185R
+    LTC: n 152, mean -0.070R, t -0.58; placebo mean -0.052R
+    LUNA: n 28, mean +0.720R, t +1.51; placebo mean +0.322R
+    MANA: n 108, mean +0.231R, t +0.70; placebo mean +0.014R
+    MATIC: n 86, mean +0.100R, t +0.48; placebo mean +0.085R
+    NEAR: n 132, mean +0.205R, t +1.11; placebo mean +0.091R
+    ONDO: n 58, mean +0.133R, t +0.48; placebo mean -0.024R
+    OP: n 94, mean -0.177R, t -1.22; placebo mean -0.049R
+    POL: n 39, mean +0.182R, t +0.66; placebo mean -0.029R
+    RUNE: n 125, mean +0.444R, t +1.98; placebo mean +0.131R
+    SAND: n 112, mean +0.113R, t +0.45; placebo mean -0.064R
+    SEI: n 68, mean +0.101R, t +0.41; placebo mean +0.057R
+    SRM: n 39, mean +0.234R, t +0.70; placebo mean +0.025R
+    SUI: n 65, mean +0.217R, t +0.88; placebo mean +0.039R
+    TAO: n 45, mean +0.393R, t +1.40; placebo mean +0.009R
+    THETA: n 142, mean +0.097R, t +0.49; placebo mean +0.092R
+    TIA: n 59, mean -0.116R, t -0.69; placebo mean -0.146R
+    TRX: n 169, mean +0.052R, t +0.35; placebo mean +0.146R
+    UNI: n 134, mean -0.061R, t -0.48; placebo mean +0.010R
+    VET: n 141, mean +0.207R, t +1.05; placebo mean +0.110R
+    WIF: n 56, mean +0.191R, t +0.51; placebo mean +0.052R
+    WLD: n 59, mean +0.392R, t +0.78; placebo mean +0.161R
+    XLM: n 123, mean +0.837R, t +1.84; placebo mean +0.278R
