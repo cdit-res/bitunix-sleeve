@@ -49,6 +49,13 @@ def funding(sym: str) -> pd.Series:
 
 
 @lru_cache(maxsize=None)
+def qvol(sym: str) -> pd.Series:
+    d = pd.read_csv(io.BytesIO(E._get(f"{E.FEED}research/perps/{sym}_1d.csv.gz")), compression="gzip", index_col=0, parse_dates=True)
+    q = d.qv.astype(float); q.index = q.index.normalize()
+    return q[~q.index.duplicated()].sort_index().loc[:B.END]
+
+
+@lru_cache(maxsize=None)
 def bars(sym: str) -> pd.DataFrame:
     d = pd.read_csv(io.BytesIO(E._get(f"{E.FEED}research/perps/{sym}_1d.csv.gz")), compression="gzip", index_col=0, parse_dates=True)
     d = d[["o", "h", "l", "c", "v"]].astype(float); d.index = d.index.normalize()
@@ -68,7 +75,13 @@ def _panel(syms: tuple[str, ...]) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFr
     Fd = pd.concat({s: funding(s).groupby(funding(s).index.normalize()).sum() for s in syms}, axis=1).reindex(idx)
     F7 = pd.concat({s: funding(s).rolling("7D").mean().groupby(funding(s).index.normalize()).last() for s in syms}, axis=1).reindex(idx)
     age = pd.concat({s: pd.Series(1.0, index=funding(s).index.normalize().unique()) for s in syms}, axis=1).reindex(idx).notna().cumsum()
-    F7 = F7.where((age >= 60) & C.notna() & V.notna())
+    # data fix (23 Oct, after the first run): delisted perps keep posting prices and default funding with no trading
+    # (FTT and SRM from 2023, MATIC after Sep 2024). A coin counts only on days it trades: seven-day median quote
+    # volume >= $1m and 60-day volatility >= 20%. Funding on days without a price bar is dropped.
+    QV = pd.concat({s: qvol(s) for s in syms}, axis=1).reindex(idx)
+    live = (QV.rolling(7, min_periods=5).median() >= 1e6) & (V >= 0.20) & C.notna()
+    F7 = F7.where((age >= 60) & live)
+    Fd = Fd.where(C.notna())
     return R, V, Fd, F7
 
 

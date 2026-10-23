@@ -27,9 +27,10 @@ def run(sym: str, placebo: bool = False) -> pd.DataFrame:
     d = F.bars(sym); c, lo, o = d.c.values, d.l.values, d.o.values; a = E.atr(d).values; n = len(d)
     f = F.funding(sym); fday = f.groupby(f.index.normalize()).sum().reindex(d.index).fillna(0.0).values
     sig = (d.c >= d.c.rolling(10).max().shift(1)).values; rows = []; k = 20
+    qv = F.qvol(sym).reindex(d.index); live = (qv.rolling(7, min_periods=5).median() >= 1e6).values
     while k < n - 1:
-        if not (placebo or sig[k]) or not np.isfinite(a[k]) or a[k] <= 0:
-            k += 1; continue
+        if not (placebo or sig[k]) or not np.isfinite(a[k]) or a[k] / c[k] < 0.005 or live[k] is False or not live[k]:
+            k += 1; continue  # data fix: skip days the contract did not trade (see swing_funding.panel)
         e, st = c[k], c[k] - a[k]; ex = None; j = k + 1
         while j < n:
             if o[j] <= st or lo[j] <= st:
