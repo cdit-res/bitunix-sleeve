@@ -334,6 +334,14 @@ def structures(sym: str, equity: float) -> list[dict]:
     if width.iat[i] < width.rolling(200, min_periods=60).quantile(0.2).iat[i]:
         add("bracket", 1, hh[i], ll[i] - 0.25 * a[i], None, "stop entry")
         add("bracket", -1, ll[i], hh[i] + 0.25 * a[i], None, "stop entry")
+    # Ichimoku cloud (owner, 24 Oct 2026): four variants on the daily cloud, live eligible through the evaluator
+    if len(dd) >= sum(ICHI) + 5:
+        zc = ichimoku(dd); j = len(dd) - 1
+        for variant in ICHI_LIVE:
+            s = ichi_signal(dd, zc, j, variant)
+            lv = ichi_levels(zc, j, s, variant, datr, px) if s else None
+            if lv:
+                add(f"ichimoku {variant}", s, lv[0], lv[1], None, "maker limit")
     return out
 
 
@@ -388,6 +396,203 @@ def edges_record(since: str = EDGES_SINCE) -> pd.DataFrame:
                     rows.append(dict(edge=f"TREND-{comp['lookback']}", sym=s, entry_day=str(since_.date()), exit_day=str(exit_day.date()),
                                      R=round((exit_px - entry) / risk - 2 * TAKER * entry / risk, 3)))
     return pd.DataFrame(rows)
+
+
+# ---------- ichimoku cloud ----------
+ICHI = (9, 26, 52)  # tenkan, kijun, senkou B; standard periods
+ICHI_VARIANTS = ("kumo-break", "tk-cross", "kumo-twist", "chikou-break")
+ICHI_SINCE = "2026-10-24"  # owner, 24 Oct 2026: all four variants scored from here
+ICHI_BACKTEST_DAYS = 540
+# Gate run 24 Oct 2026: 540 daily bars, entry one bar after the signal, matched placebo (same side, same cloud regime,
+# same count), a fit set of 26 symbols and a held-out set of 40 fresh ones. Best t was 1.42, no variant held across both
+# halves and both sets, and tk-cross was negative out of sample. Nothing clears t of 3, so nothing is live eligible.
+# Signals are still scored forward, so the record decides later rather than an opinion now.
+ICHI_LIVE: tuple[str, ...] = ()
+
+
+def ichimoku(d: pd.DataFrame) -> pd.DataFrame:
+    """Tenkan, Kijun and the two Senkou spans on the frame's own bars. Spans are shifted forward by the Kijun period,
+    so row i holds the cloud sitting under bar i, which is the cloud a break at bar i has to clear."""
+    t, k, b = ICHI
+    mid = lambda n: (d.h.rolling(n).max() + d.l.rolling(n).min()) / 2
+    z = pd.DataFrame(index=d.index)
+    z["tenkan"], z["kijun"] = mid(t), mid(k)
+    z["ssa"] = ((z.tenkan + z.kijun) / 2).shift(k)
+    z["ssb"] = mid(b).shift(k)
+    z["top"], z["bot"] = z[["ssa", "ssb"]].max(axis=1), z[["ssa", "ssb"]].min(axis=1)
+    return z
+
+
+def ichi_signal(d: pd.DataFrame, z: pd.DataFrame, i: int, variant: str) -> int:
+    """1 long, -1 short, 0 none, read at bar i. No forward data: the Chikou test compares today's close with the high or
+    low of 26 bars back, which is what the lagging span being clear of price means."""
+    k = ICHI[1]
+    c, h, l = d.c.values, d.h.values, d.l.values
+    top, bot, ten, kij, ssa, ssb = (z[x].values for x in ("top", "bot", "tenkan", "kijun", "ssa", "ssb"))
+    if i < k + 1 or not np.isfinite(top[i]) or not np.isfinite(top[i - 1]):
+        return 0
+    if variant in ("kumo-break", "chikou-break"):
+        s = 1 if (c[i] > top[i] and c[i - 1] <= top[i - 1]) else -1 if (c[i] < bot[i] and c[i - 1] >= bot[i - 1]) else 0
+        if s and variant == "chikou-break":
+            s = s if ((c[i] > h[i - k]) if s == 1 else (c[i] < l[i - k])) else 0
+        return s
+    if variant == "tk-cross":  # a cross is only taken outside the cloud, where the signal has any history behind it
+        if ten[i] > kij[i] and ten[i - 1] <= kij[i - 1] and c[i] > top[i]:
+            return 1
+        if ten[i] < kij[i] and ten[i - 1] >= kij[i - 1] and c[i] < bot[i]:
+            return -1
+        return 0
+    if variant == "kumo-twist":
+        if ssa[i] > ssb[i] and ssa[i - 1] <= ssb[i - 1]:
+            return 1
+        if ssa[i] < ssb[i] and ssa[i - 1] >= ssb[i - 1]:
+            return -1
+    return 0
+
+
+def ichi_levels(z: pd.DataFrame, i: int, side: int, variant: str, datr: float, px: float | None = None) -> tuple[float, float] | None:
+    """Entry and stop. A break retests the near cloud edge; a cross or twist enters at the Kijun. The stop always sits
+    1.0 ATR beyond the far cloud edge, which is the level that invalidates the signal. A limit on the wrong side of price
+    would cross as a taker, so it is dropped: the twist fires with no price condition and can sit either side."""
+    top, bot, kij = float(z.top.iat[i]), float(z.bot.iat[i]), float(z.kijun.iat[i])
+    if not all(np.isfinite(x) for x in (top, bot, kij, datr)):
+        return None
+    entry = (top if side == 1 else bot) if variant in ("kumo-break", "chikou-break") else kij
+    stop = bot - STOP_BEYOND_ATR * datr if side == 1 else top + STOP_BEYOND_ATR * datr
+    if side * (entry - stop) <= 0:
+        return None
+    if px is not None and np.isfinite(px) and side * (px - entry) < 0:
+        return None
+    return entry, stop
+
+
+def _ichi_trade(d: pd.DataFrame, z: pd.DataFrame, k: int, side: int, delay: int = 1) -> float | None:
+    """Score one signal on daily bars and return R. Entry is the close `delay` bars after the signal, which is how the
+    08:30 run would act on it; delay 0 enters on the signal bar itself and reads better than it trades. Stop 1 ATR beyond
+    the far cloud edge, trailed to the Kijun in the trade's direction only, exit on a close back inside the cloud."""
+    a, c, h, l = atr(d).values, d.c.values, d.h.values, d.l.values
+    top, bot, kij = z.top.values, z.bot.values, z.kijun.values
+    j = k + delay
+    if j >= len(d) - 1 or not np.isfinite(top[j]):
+        return None
+    entry = c[j]
+    stop = bot[j] - a[j] if side == 1 else top[j] + a[j]
+    risk = abs(entry - stop)
+    if not np.isfinite(risk) or risk <= 0 or side * (entry - stop) <= 0:
+        return None
+    for t in range(j + 1, len(d)):
+        if (l[t] <= stop) if side == 1 else (h[t] >= stop):
+            ex = stop
+            break
+        if (c[t] < top[t]) if side == 1 else (c[t] > bot[t]):
+            ex = c[t]
+            break
+        if np.isfinite(kij[t]):
+            stop = max(stop, kij[t]) if side == 1 else min(stop, kij[t])
+    else:
+        ex = c[-1]
+    return round(side * (ex - entry) / risk - (MAKER + TAKER) * entry / risk, 3)
+
+
+def ichi_symbols() -> tuple[str, ...]:
+    return tuple(SCAN_CRYPTO) + tuple(SCAN_STOCKS)
+
+
+def ichimoku_record(days: int = ICHI_BACKTEST_DAYS, delay: int = 1, syms: tuple[str, ...] | None = None,
+                    seed: int = 20261024) -> pd.DataFrame:
+    """Every signal of all four variants against a matched placebo. The placebo holds side, cloud regime and trade count
+    constant and randomises only the day, so it asks the one question that matters: does crossing out of the cloud today
+    beat being already outside it. Without that match the placebo enters nearer the cloud, its risk denominator is
+    smaller and it flatters itself."""
+    rows: list[dict] = []
+    rng = np.random.default_rng(seed)
+    for s in (syms or ichi_symbols()):
+        try:
+            d = daily_done(s).iloc[-days:]
+        except Exception:
+            continue
+        if len(d) < sum(ICHI) + 10:
+            continue
+        z = ichimoku(d); c, top, bot = d.c.values, z.top.values, z.bot.values; half = len(d) // 2
+        for variant in ICHI_VARIANTS:
+            ks = [k for k in range(ICHI[1] + 1, len(d) - 2) if ichi_signal(d, z, k, variant)]
+            for k in ks:
+                side = ichi_signal(d, z, k, variant); r = _ichi_trade(d, z, k, side, delay)
+                if r is not None:
+                    rows.append(dict(edge=variant, arm="signal", sym=s, side="long" if side == 1 else "short",
+                                     entry_day=str(d.index[k].date()), half=int(k >= half),
+                                     live=str(d.index[k].date()) >= ICHI_SINCE, R=r))
+            for side in (1, -1):
+                n = sum(1 for k in ks if ichi_signal(d, z, k, variant) == side)
+                pool = [k for k in range(ICHI[1] + 1, len(d) - 2) if k not in ks and np.isfinite(top[k])
+                        and ((c[k] > top[k]) if side == 1 else (c[k] < bot[k]))]
+                if not n or not pool:
+                    continue
+                for k in rng.choice(pool, size=min(n, len(pool)), replace=False):
+                    r = _ichi_trade(d, z, int(k), side, delay)
+                    if r is not None:
+                        rows.append(dict(edge=variant, arm="placebo", sym=s, side="long" if side == 1 else "short",
+                                         entry_day=str(d.index[int(k)].date()), half=int(int(k) >= half), live=False, R=r))
+    return pd.DataFrame(rows)
+
+
+def _welch_t(a: pd.Series, b: pd.Series) -> float:
+    if len(a) < 2 or len(b) < 2:
+        return float("nan")
+    se = np.sqrt(a.var(ddof=1) / len(a) + b.var(ddof=1) / len(b))
+    return float((a.mean() - b.mean()) / se) if se > 0 else float("nan")
+
+
+def ichimoku_report(delay: int = 1) -> None:
+    print(f"ICHIMOKU {'/'.join(str(x) for x in ICHI)} daily cloud, {len(ichi_symbols())} symbols, four variants scored "
+          f"from {ICHI_SINCE}; live eligible: "
+          f"{', '.join(ICHI_LIVE) if ICHI_LIVE else 'none, all four failed the gate on 24 Oct 2026'}")
+    live = []
+    for s in ichi_symbols():
+        try:
+            d = daily_done(s)
+        except Exception:
+            continue
+        if len(d) < sum(ICHI) + 5:
+            continue
+        z = ichimoku(d); i = len(d) - 1; datr = float(atr(d).iat[-1])
+        try:
+            px = price(s)[0]
+        except Exception:
+            px = float("nan")
+        for variant in ICHI_VARIANTS:
+            side = ichi_signal(d, z, i, variant)
+            if not side:
+                continue
+            lv = ichi_levels(z, i, side, variant, datr, px)
+            live.append(f"  {s} {'long' if side == 1 else 'short'} {variant}"
+                        + (f": entry {_fmt(lv[0])} stop {_fmt(lv[1])}" if lv else ": dropped, limit would cross as a taker")
+                        + ("" if variant in ICHI_LIVE else "  [paper, not live eligible]"))
+    print("TODAY: " + ("none" if not live else f"{len(live)} signal(s)"))
+    print("\n".join(live))
+    rec = ichimoku_record(delay=delay)
+    if rec.empty:
+        print("No scored signals.")
+        return
+    print(f"\nRecord over the last {ICHI_BACKTEST_DAYS} daily bars, entry {delay} bar(s) after the signal, each variant "
+          f"against its matched placebo. Signals before {ICHI_SINCE} are in sample.")
+    print(f"  {'variant':14s} {'n':>5s} {'signal':>8s} {'placebo':>8s} {'delta':>7s} {'t':>6s} {'h1':>6s} {'h2':>6s} {'win%':>5s}")
+    for v in ICHI_VARIANTS:
+        g = rec[rec.edge == v]; a, b = g[g.arm == "signal"].R, g[g.arm == "placebo"].R
+        if not len(a):
+            print(f"  {v:14s} {0:5d}  no signals")
+            continue
+        hd = []
+        for hh in (0, 1):
+            ah, bh = g[(g.arm == "signal") & (g.half == hh)].R, g[(g.arm == "placebo") & (g.half == hh)].R
+            hd.append(ah.mean() - bh.mean() if len(ah) and len(bh) else float("nan"))
+        print(f"  {v:14s} {len(a):5d} {a.mean():8.3f} {b.mean():8.3f} {a.mean() - b.mean():7.3f} "
+              f"{_welch_t(a, b):6.2f} {hd[0]:6.2f} {hd[1]:6.2f} {np.mean(a > 0) * 100:5.1f}")
+    print("  Gate for live status: t of 3 or more, positive in both halves, and holding on held-out symbols. The t here "
+          "also overstates the case, because trades overlap across correlated symbols.")
+    fwd = rec[(rec.arm == "signal") & rec.live]
+    print(f"Forward paper from {ICHI_SINCE}: "
+          + ("none yet" if fwd.empty else "\n" + fwd.groupby("edge").R.agg(["size", "mean", "sum"]).round(3).to_string()))
 
 
 # ---------- scoring ----------
@@ -617,6 +822,19 @@ def scan(equity: float, stocks: bool) -> None:
         print(f"  {s}: MAX-10 {m['action']}" + (f" at {m['price']}, stop {m['stop']} ({m['stop_pct']}%)" if m['action'] in ("buy", "roll") else "")
               + f"; trend components long {len(act)}/9" + (f", new today: {', '.join(new)}" if new else "")
               + ("; stops " + ", ".join(f"{c['lookback']}d {c['stop']}" for c in act) if act else ""))
+    try:
+        n_ichi = 0
+        for s in ichi_symbols():
+            d = daily_done(s)
+            if len(d) < sum(ICHI) + 5:
+                continue
+            z = ichimoku(d); i = len(d) - 1
+            n_ichi += sum(1 for v in ICHI_VARIANTS if ichi_signal(d, z, i, v))
+        print(f"ICHIMOKU: {n_ichi} cloud signal(s) today across {len(ichi_symbols())} symbols and four variants; "
+              f"live eligible: {', '.join(ICHI_LIVE) if ICHI_LIVE else 'none, paper only'}; "
+              f"'engine.py ichimoku' for the record")
+    except Exception as e:
+        print(f"ICHIMOKU: unavailable ({type(e).__name__}: {e})")
     rows = []
     for s in syms:
         try:
@@ -682,6 +900,10 @@ def main(argv: list[str]) -> None:
         print("\nPaper record since", EDGES_SINCE, ":", "none yet" if rec.empty else "")
         if not rec.empty:
             print(rec.groupby("edge").R.agg(["size", "mean", "sum"]).round(3).to_string())
+        print()
+        ichimoku_report()
+    elif cmd == "ichimoku":
+        ichimoku_report()
     elif cmd == "html":
         spec = json.loads(Path(argv[2]).read_text()); body, text = html(spec)
         Path("brief.html").write_text(body); Path("brief.txt").write_text(text); print(text)
