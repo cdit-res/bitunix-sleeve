@@ -114,3 +114,17 @@ Cross-sectional momentum and low volatility across 50 perps fail (SW25). SW10 sp
 
 Count for the day: 28 swing and position tests and checks, one adopted rule (SW10), one bug caught (dead contracts in the funding data). The daily price and funding data for this universe are close to exhausted for new rules. What could still add: a live record for SW10 and the weekly version (SW19), Bitunix funding on the leveraged-ETF perps (SW15), and data types not yet in the feed (open interest, options).
 
+## Bitunix alert templates, 25 October 2026
+
+The owner asked for the app's Super Alert templates to be tested: eleven cards from the Range, Breakout, Trend and Reversal tabs. Bitunix does not publish the conditions a template fills in, so each was built from its card with textbook settings and an exit per template (both the owner's choices), pre-registered and run once on crypto 1h, 4h and daily and on stocks daily and 1h (bitunix_templates.py; ledger BX1 to BX11). None of the 51 variants passed.
+
+| Chart | Result |
+|---|---|
+| Crypto 1h | Nine of eleven lose in design (-0.05R to -0.19R a trade), about level with their placebos: costs, as with every intraday rule before. The two positive ones are rare and negative held out |
+| Crypto 4h and daily | Most trend and breakout templates earn in the 2020-23 design years (DEMA55 on 4h +0.29R, t 3.6) but fall away held out or match their placebo |
+| Stocks daily | Trend templates do no better than random entries above EMA 50 with the same exit: beta |
+| Stocks 1h | Design means of +0.10R to +0.16R fade to about zero or below held out |
+| Reversal templates | The MACD golden cross at RSI under 30 and the morning star with divergence fire 0 to 17 times a chart in design: too rare to judge. The hammer and the death-cross short fire more often and fail |
+
+Nearest misses, not adopted: DEMA55 trend follow on crypto daily and Bollinger oversold dips on stocks daily are positive and above their placebo in every set, at design t 2.3 and 1.6. Both rest on a few large trades, and among 51 variants a few results like these are likely by chance. If the app's templates use other settings, a re-run needs only the rule edits in bitunix_templates.py.
+

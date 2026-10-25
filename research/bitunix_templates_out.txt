@@ -1,0 +1,83 @@
+Bitunix Super Alert templates against the standing gate (owner, 25 Oct 2026), pre-registered before running.
+  BX1   Bollinger oversold mean reversion (A)
+  BX2   Bollinger upper band breakout (B)
+  BX3   Mid-band MACD cross (B)
+  BX4   TEMA cross above VWAP (B)
+  BX5   DEMA55 bullish trend follow (B)
+  BX6   VWAP bullish confirmation (B)
+  BX7   Three white soldiers trend confirm (B)
+  BX8   MACD golden cross, low RSI (A)
+  BX9   MACD death cross, high RSI (short) (A)
+  BX10  Hammer oversold bounce (A)
+  BX11  Morning star bullish divergence (A)
+  A exits at the Bollinger middle band or the 20th close; B on a 3 ATR chandelier trail, 200 bars at most.
+
+Net R a trade. Design, its halves (h1, h2), held out and fresh; d = trade minus its placebo mean.
+
+CRYPTO 1H
+          n  design      t      h1      h2    held     n   fresh     n   d des      t  d held  d frsh  verdict
+BX1    1368  -0.185  -5.75  -0.169  -0.203  -0.194   907  -0.152  3231  -0.004  -0.14  -0.006  +0.006  fail: t, halves, held, fresh, placebo
+BX2    1778  -0.067  -2.10  -0.074  -0.061  -0.009  1029  -0.055  4119  +0.009  +0.28  +0.071  +0.071  fail: t, halves, held, fresh
+BX3    1665  -0.062  -1.60  -0.044  -0.078  -0.066  1016  -0.055  4048  +0.015  +0.37  +0.012  +0.071  fail: t, halves, held, fresh
+BX4    3185  -0.070  -2.11  -0.113  -0.023  -0.051  1870  -0.084  7645  +0.006  +0.20  +0.030  +0.041  fail: t, halves, held, fresh
+BX5    1687  -0.055  -1.39  -0.052  -0.058  -0.055  1062  -0.070  4222  +0.022  +0.56  +0.023  +0.056  fail: t, halves, held, fresh
+BX6    2450  -0.066  -1.86  -0.035  -0.095  -0.097  1496  -0.077  5944  +0.011  +0.30  -0.016  +0.049  fail: t, halves, held, fresh, placebo
+BX7     104  +0.153  +1.01  -0.107  +0.359  -0.079    69  -0.011   319  +0.235  +1.55  +0.009  +0.119  fail: t, halves, held, fresh
+BX8      17  -0.186  -0.88  -0.220  +0.067  +0.379    15  -0.107    45  +0.013  +0.06  +0.551  +0.052  fail: t, halves, fresh
+BX9      43  -0.053  -0.31  -0.386  +0.456  -0.362    24  +0.024    55  +0.140  +0.83  -0.201  +0.146  fail: t, halves, held, placebo
+BX10    230  -0.161  -2.77  -0.185  -0.136  -0.021    86  -0.024   466  +0.019  +0.33  +0.169  +0.135  fail: t, halves, held, fresh
+BX11     17  +0.056  +0.48  +0.330  -0.058  -0.298     9  -0.034    48  +0.205  +1.74  -0.128  +0.112  fail: t, halves, held, fresh, placebo
+
+CRYPTO 4H
+          n  design      t      h1      h2    held     n   fresh     n   d des      t  d held  d frsh  verdict
+BX1     437  -0.155  -2.81  -0.118  -0.178  -0.064   359  -0.054  1136  -0.073  -1.32  +0.042  +0.053  fail: t, halves, held, fresh, placebo
+BX2     581  +0.105  +1.70  +0.158  +0.052  +0.013   423  -0.010  1540  -0.046  -0.74  +0.057  +0.008  fail: t, fresh, placebo
+BX3     554  +0.224  +2.78  +0.379  +0.079  -0.029   388  +0.100  1351  +0.075  +0.93  +0.019  +0.116  fail: t, held
+BX4    1164  +0.115  +1.99  +0.299  -0.023  +0.029   862  +0.022  3121  -0.035  -0.61  +0.074  +0.041  fail: t, halves, placebo
+BX5     538  +0.290  +3.59  +0.399  +0.196  -0.044   408  +0.163  1473  +0.142  +1.76  +0.007  +0.180  fail: held
+BX6     827  +0.135  +2.03  +0.272  +0.017  -0.051   618  +0.053  2186  -0.014  -0.22  -0.003  +0.071  fail: t, held, placebo
+BX7      35  -0.112  -0.68  -0.081  -0.136  +0.275    21  -0.037    93  -0.257  -1.57  +0.338  -0.009  fail: t, halves, fresh, placebo
+BX8       3  -0.426  -1.40    +nan  -0.426  +0.609     3  -0.281    12  -0.359  -1.16  +0.694  -0.178  fail: t, halves, fresh, placebo
+BX9      13  -0.141  -0.54  +0.345  -0.444  -0.553    14  +0.489     8  -0.044  -0.17  -0.439  +0.601  fail: t, halves, held, placebo
+BX10     50  -0.275  -2.28  +0.090  -0.446  -0.257    39  -0.210   153  -0.197  -1.64  -0.149  -0.103  fail: t, halves, held, fresh, placebo
+BX11      3  -0.330  -0.97  -0.484  -0.022    +nan     0  -0.004    13  -0.230  -0.70    +nan  +0.095  fail: t, halves, held, fresh, placebo
+
+CRYPTO 1D
+          n  design      t      h1      h2    held     n   fresh     n   d des      t  d held  d frsh  verdict
+BX1      46  -0.099  -0.66  +0.054  -0.117  -0.200    42  -0.066   141  -0.143  -0.95  -0.187  +0.034  fail: t, halves, held, fresh, placebo
+BX2      93  +0.633  +3.08  +0.969  +0.356  -0.046    81  +0.106   269  +0.268  +1.31  +0.033  -0.125  fail: held, placebo
+BX3      80  +0.257  +1.13  +0.406  +0.115  +0.192    72  +0.294   194  -0.128  -0.57  +0.253  +0.072  fail: t, placebo
+BX5      81  +0.640  +2.34  +0.976  +0.420  +0.275    69  +0.317   224  +0.257  +0.95  +0.360  +0.102  fail: t
+BX7       5  +0.885  +1.42  +0.886  +0.883  -0.349    11  -0.275    16  +0.429  +0.65  -0.267  -0.493  fail: t, held, fresh, placebo
+BX8       0    +nan   +nan    +nan    +nan    +nan     0  +1.628     1    +nan   +nan    +nan  +1.750  fail: t, halves, held, placebo
+BX9       2  -0.359   +nan    +nan  -0.359  +1.655     1  +0.283     2  -0.273   +nan  +1.615  +0.316  fail: t, halves, placebo
+BX10      7  +0.562  +1.26  +0.088  +0.641  +0.013     6  +0.296    19  +0.473  +1.07  -0.010  +0.382  fail: t, placebo
+BX11      1  -0.007   +nan    +nan  -0.007  -0.018     1  -0.569     2  -0.047   +nan  +0.006  -0.420  fail: t, halves, held, fresh, placebo
+
+STOCKS 1D
+          n  design      t      h1      h2    held     n   fresh     n   d des      t  d held  d frsh  verdict
+BX1     196  +0.171  +1.58  +0.259  +0.076  +0.869    75  +0.283   754  +0.133  +1.24  +0.829  +0.247  fail: t
+BX2     491  +0.229  +2.79  +0.217  +0.241  +0.436   349  +0.160  1869  -0.102  -1.25  +0.059  -0.027  fail: t, placebo
+BX3     523  +0.298  +2.94  +0.261  +0.335  +0.482   377  +0.172  1993  -0.002  -0.02  +0.089  -0.008  fail: t, placebo
+BX5     482  +0.281  +2.81  +0.355  +0.216  +0.546   308  +0.225  1822  -0.009  -0.09  +0.172  +0.041  fail: t, placebo
+BX7      18  -0.046  -0.19  +0.297  -0.264  +1.095    21  +0.256    73  -0.394  -1.74  +0.495  +0.081  fail: t, halves, placebo
+BX8       1  +0.418   +nan  +0.418    +nan    +nan     0  +0.063     7  +0.307   +nan    +nan  +0.065  fail: t, halves, held, placebo
+BX9      20  -0.199  -0.60  -0.512  +0.531  +0.278     8  -0.257    82  +0.024  +0.08  +0.462  -0.076  fail: t, halves, fresh, placebo
+BX10     13  -0.177  -0.72  -0.402  +0.327  +0.612     4  +0.306    63  -0.167  -0.75  +0.611  +0.273  fail: t, halves, placebo
+BX11     14  +0.294  +2.63  +0.401  +0.214  -1.079     1  -0.107    17  +0.227  +2.14  -1.033  -0.142  fail: t, held, fresh, placebo
+
+STOCKS 1H
+          n  design      t      h1      h2    held     n   fresh     n   d des      t  d held  d frsh  verdict
+BX1     610  -0.010  -0.14  -0.060  +0.036  +0.026   546  -0.177   351  +0.030  +0.40  +0.143  -0.080  fail: t, halves, fresh, placebo
+BX2     780  +0.142  +2.36  +0.150  +0.134  +0.006   686  +0.089   381  +0.087  +1.45  +0.093  +0.112  fail: t
+BX3     811  +0.161  +2.24  +0.136  +0.185  -0.046   732  +0.018   411  +0.114  +1.60  +0.045  +0.058  fail: t, held
+BX4    1781  +0.147  +2.72  +0.146  +0.147  -0.007  1698  -0.015   981  +0.091  +1.70  +0.105  +0.012  fail: t, held, fresh
+BX5     742  +0.156  +2.21  +0.184  +0.130  -0.063   716  -0.075   404  +0.101  +1.45  +0.040  -0.037  fail: t, held, fresh, placebo
+BX6    1124  +0.098  +1.67  +0.161  +0.042  -0.072  1030  -0.069   603  +0.044  +0.76  +0.031  -0.036  fail: t, held, fresh, placebo
+BX7      57  +0.194  +0.55  +0.430  -0.034  -0.442    34  +1.400    32  +0.087  +0.25  -0.274  +1.435  fail: t, halves, held, placebo
+BX8      15  +0.270  +1.00  +0.037  +0.618  +0.057    17  +0.192    15  +0.331  +1.24  +0.166  +0.317  fail: t
+BX9      75  -0.196  -1.33  -0.356  -0.095  -0.126    67  -0.210    53  +0.078  +0.53  +0.106  -0.022  fail: t, halves, held, fresh, placebo
+BX10     58  +0.206  +1.15  -0.027  +0.440  +0.011    80  +0.188    50  +0.240  +1.35  +0.104  +0.287  fail: t, halves
+BX11      5  +0.069  +0.21  -0.028  +0.457  +0.184     4  -0.510     2  +0.082  +0.27  +0.209  -0.397  fail: t, halves, fresh, placebo
+
+0 of 51 variants pass the gate.

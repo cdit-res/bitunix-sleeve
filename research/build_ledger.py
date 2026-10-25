@@ -13,6 +13,10 @@ FIELDS = ["id", "date", "family", "hypothesis", "instruments", "timeframe", "hol
           "verdict", "script", "notes"]
 
 # design / held_out / fresh: mean R per trade (t) unless stated; "n/a" where a set was not run.
+BX_SETS = ("crypto (c): BTC, ETH, SOL, XRP design, LINK, BNB, ADA, DOGE, AVAX, DOT fresh; "
+           "stocks (s): the 18 scan names design, 40 further names (daily) or five (1h) fresh")
+BX_HOLD_A = "to the Bollinger middle band, 20 bars at most"
+BX_HOLD_B = "chandelier trail (3 ATR), 200 bars at most"
 ENTRIES: list[dict] = [
     # ---- 24 September 2026 ----
     dict(id="S01", date="2026-09-24", family="chart structure", hypothesis="Pullback, failed move and bracket structures, mechanical", instruments="20 pairs 2022-23; BTC 2017-26", timeframe="4h", hold="to 3R or stop",
@@ -268,6 +272,40 @@ ENTRIES: list[dict] = [
     dict(id="SW26", date="2026-10-23", family="execution", hypothesis="SW10 with a resting buy-stop at the ten-close high (H1a) or a resting sell-stop at the three-close low (H1b), hourly fills", instruments="ten coins, 2022 on", timeframe="1h fills", hold="days",
          design="baseline (08:00 fills) +0.144R a trade, about +13.7R a year capped", held_out="H1a +0.085R, about +4.4R a year", fresh="H1b -0.003R", verdict="fail: keep close-based entries and exits", script="swing_resting.py",
          notes="Resting buy-stops catch false breakouts; intraday sell-stops get shaken out. Entering and exiting at the 08:30 run after the daily close is better"),
+    # ---- 25 October 2026, Bitunix Super Alert templates (c = crypto, s = stocks; textbook settings, an exit per template) ----
+    dict(id="BX1", date="2026-10-25", family="alert template", hypothesis="Bitunix template, Bollinger oversold mean reversion: close below the lower band (20, 2), RSI under 30, close below EMA 50; long", instruments=BX_SETS, timeframe="c1h, c4h, c1d, s1d, s1h", hold=BX_HOLD_A,
+         design="c1h -0.185R (t -5.8, n 1368); c4h -0.155R (t -2.8, n 437); c1d -0.099R (t -0.7, n 46); s1d +0.171R (t +1.6, n 196); s1h -0.010R (t -0.1, n 610)", held_out="c1h -0.194R (n 907); c4h -0.064R (n 359); c1d -0.200R (n 42); s1d +0.869R (n 75); s1h +0.026R (n 546)", fresh="c1h -0.152R (n 3231); c4h -0.054R (n 1136); c1d -0.066R (n 141); s1d +0.283R (n 754); s1h -0.177R (n 351)", verdict="fail", script="bitunix_templates.py",
+         notes="s1d is positive and above its placebo in every set (d +0.13, +0.83, +0.25) but design t 1.6 with a median design trade of -1.0R. c1h loses 0.185R a trade, level with its placebo: costs"),
+    dict(id="BX2", date="2026-10-25", family="alert template", hypothesis="Bitunix template, Bollinger upper band breakout: close crosses above the upper band, RSI over 50; long", instruments=BX_SETS, timeframe="c1h, c4h, c1d, s1d, s1h", hold=BX_HOLD_B,
+         design="c1h -0.067R (t -2.1, n 1778); c4h +0.105R (t +1.7, n 581); c1d +0.633R (t +3.1, n 93); s1d +0.229R (t +2.8, n 491); s1h +0.142R (t +2.4, n 780)", held_out="c1h -0.009R (n 1029); c4h +0.013R (n 423); c1d -0.046R (n 81); s1d +0.436R (n 349); s1h +0.006R (n 686)", fresh="c1h -0.055R (n 4119); c4h -0.010R (n 1540); c1d +0.106R (n 269); s1d +0.160R (n 1869); s1h +0.089R (n 381)", verdict="fail", script="bitunix_templates.py",
+         notes="c1d passes design (t 3.1) but is negative held out and below its placebo on fresh coins (d -0.13). s1d is level with its placebo (d -0.10, +0.06, -0.03): beta with a trailing exit. s1h is above its placebo in every set but t 2.4 and +0.006R held out"),
+    dict(id="BX3", date="2026-10-25", family="alert template", hypothesis="Bitunix template, mid-band MACD cross: MACD golden cross, close above the middle band, RSI over 50; long", instruments=BX_SETS, timeframe="c1h, c4h, c1d, s1d, s1h", hold=BX_HOLD_B,
+         design="c1h -0.062R (t -1.6, n 1665); c4h +0.224R (t +2.8, n 554); c1d +0.257R (t +1.1, n 80); s1d +0.298R (t +2.9, n 523); s1h +0.161R (t +2.2, n 811)", held_out="c1h -0.066R (n 1016); c4h -0.029R (n 388); c1d +0.192R (n 72); s1d +0.482R (n 377); s1h -0.046R (n 732)", fresh="c1h -0.055R (n 4048); c4h +0.100R (n 1351); c1d +0.294R (n 194); s1d +0.172R (n 1993); s1h +0.018R (n 411)", verdict="fail", script="bitunix_templates.py",
+         notes="c4h t 2.8 in design, negative held out. s1d is level with its placebo (d -0.00, +0.09, -0.01): beta"),
+    dict(id="BX4", date="2026-10-25", family="alert template", hypothesis="Bitunix template, TEMA cross above VWAP: TEMA 9 crosses above the daily VWAP; long", instruments=BX_SETS, timeframe="c1h, c4h, s1h", hold=BX_HOLD_B,
+         design="c1h -0.070R (t -2.1, n 3185); c4h +0.115R (t +2.0, n 1164); s1h +0.147R (t +2.7, n 1781)", held_out="c1h -0.051R (n 1870); c4h +0.029R (n 862); s1h -0.007R (n 1698)", fresh="c1h -0.084R (n 7645); c4h +0.022R (n 3121); s1h -0.015R (n 981)", verdict="fail", script="bitunix_templates.py",
+         notes="c1h negative in every set. s1h t 2.7 in design fades to -0.007R held out"),
+    dict(id="BX5", date="2026-10-25", family="alert template", hypothesis="Bitunix template, DEMA55 bullish trend follow: MACD golden cross, close above DEMA 55; long", instruments=BX_SETS, timeframe="c1h, c4h, c1d, s1d, s1h", hold=BX_HOLD_B,
+         design="c1h -0.055R (t -1.4, n 1687); c4h +0.290R (t +3.6, n 538); c1d +0.640R (t +2.3, n 81); s1d +0.281R (t +2.8, n 482); s1h +0.156R (t +2.2, n 742)", held_out="c1h -0.055R (n 1062); c4h -0.044R (n 408); c1d +0.275R (n 69); s1d +0.546R (n 308); s1h -0.063R (n 716)", fresh="c1h -0.070R (n 4222); c4h +0.163R (n 1473); c1d +0.317R (n 224); s1d +0.225R (n 1822); s1h -0.075R (n 404)", verdict="fail", script="bitunix_templates.py",
+         notes="Nearest miss. c1d is positive and above its placebo in every set (d +0.26, +0.36, +0.10) but design t 2.3, and the top five trades carry 49% to 133% of each set's total. c4h t 3.6 in design, -0.044R held out (d +0.01)"),
+    dict(id="BX6", date="2026-10-25", family="alert template", hypothesis="Bitunix template, VWAP bullish confirmation: MACD golden cross, close above the daily VWAP; long", instruments=BX_SETS, timeframe="c1h, c4h, s1h", hold=BX_HOLD_B,
+         design="c1h -0.066R (t -1.9, n 2450); c4h +0.135R (t +2.0, n 827); s1h +0.098R (t +1.7, n 1124)", held_out="c1h -0.097R (n 1496); c4h -0.051R (n 618); s1h -0.072R (n 1030)", fresh="c1h -0.077R (n 5944); c4h +0.053R (n 2186); s1h -0.069R (n 603)", verdict="fail", script="bitunix_templates.py",
+         notes="Negative held out on every chart"),
+    dict(id="BX7", date="2026-10-25", family="alert template", hypothesis="Bitunix template, three white soldiers trend confirm: the pattern, RSI over 50, close above EMA 50; long", instruments=BX_SETS, timeframe="c1h, c4h, c1d, s1d, s1h", hold=BX_HOLD_B,
+         design="c1h +0.153R (t +1.0, n 104); c4h -0.112R (t -0.7, n 35); c1d +0.885R (t +1.4, n 5); s1d -0.046R (t -0.2, n 18); s1h +0.194R (t +0.5, n 57)", held_out="c1h -0.079R (n 69); c4h +0.275R (n 21); c1d -0.349R (n 11); s1d +1.095R (n 21); s1h -0.442R (n 34)", fresh="c1h -0.011R (n 319); c4h -0.037R (n 93); c1d -0.275R (n 16); s1d +0.256R (n 73); s1h +1.400R (n 32)", verdict="fail", script="bitunix_templates.py",
+         notes="Rare (5 to 104 design trades a chart) with no stable sign"),
+    dict(id="BX8", date="2026-10-25", family="alert template", hypothesis="Bitunix template, MACD golden cross with low RSI: golden cross with RSI under 30; long", instruments=BX_SETS, timeframe="c1h, c4h, c1d, s1d, s1h", hold=BX_HOLD_A,
+         design="c1h -0.186R (t -0.9, n 17); c4h -0.426R (t -1.4, n 3); c1d n 0; s1d n 1; s1h +0.270R (t +1.0, n 15)", held_out="c1h +0.379R (n 15); c4h +0.609R (n 3); c1d n 0; s1d n 0; s1h +0.057R (n 17)", fresh="c1h -0.107R (n 45); c4h -0.281R (n 12); c1d +1.628R (n 1); s1d +0.063R (n 7); s1h +0.192R (n 15)", verdict="fail", script="bitunix_templates.py",
+         notes="Too rare at RSI under 30 (0 to 17 design trades a chart) to judge"),
+    dict(id="BX9", date="2026-10-25", family="alert template", hypothesis="Bitunix template, MACD death cross with high RSI: death cross with RSI over 70; short", instruments=BX_SETS, timeframe="c1h, c4h, c1d, s1d, s1h", hold=BX_HOLD_A,
+         design="c1h -0.053R (t -0.3, n 43); c4h -0.141R (t -0.5, n 13); c1d n 2; s1d -0.199R (t -0.6, n 20); s1h -0.196R (t -1.3, n 75)", held_out="c1h -0.362R (n 24); c4h -0.553R (n 14); c1d +1.655R (n 1); s1d +0.278R (n 8); s1h -0.126R (n 67)", fresh="c1h +0.024R (n 55); c4h +0.489R (n 8); c1d +0.283R (n 2); s1d -0.257R (n 82); s1h -0.210R (n 53)", verdict="fail", script="bitunix_templates.py",
+         notes="Negative in design on every chart"),
+    dict(id="BX10", date="2026-10-25", family="alert template", hypothesis="Bitunix template, hammer oversold bounce: a hammer with RSI under 30, close below EMA 50; long", instruments=BX_SETS, timeframe="c1h, c4h, c1d, s1d, s1h", hold=BX_HOLD_A,
+         design="c1h -0.161R (t -2.8, n 230); c4h -0.275R (t -2.3, n 50); c1d +0.562R (t +1.3, n 7); s1d -0.177R (t -0.7, n 13); s1h +0.206R (t +1.1, n 58)", held_out="c1h -0.021R (n 86); c4h -0.257R (n 39); c1d +0.013R (n 6); s1d +0.612R (n 4); s1h +0.011R (n 80)", fresh="c1h -0.024R (n 466); c4h -0.210R (n 153); c1d +0.296R (n 19); s1d +0.306R (n 63); s1h +0.188R (n 50)", verdict="fail", script="bitunix_templates.py",
+         notes="c1h and c4h negative in design. s1h +0.206R with halves of opposite sign"),
+    dict(id="BX11", date="2026-10-25", family="alert template", hypothesis="Bitunix template, morning star bullish divergence: a morning star at a lower low with a higher MACD (DIF) low; long", instruments=BX_SETS, timeframe="c1h, c4h, c1d, s1d, s1h", hold=BX_HOLD_A,
+         design="c1h +0.056R (t +0.5, n 17); c4h -0.330R (t -1.0, n 3); c1d n 1; s1d +0.294R (t +2.6, n 14); s1h +0.069R (t +0.2, n 5)", held_out="c1h -0.298R (n 9); c4h n 0; c1d -0.018R (n 1); s1d -1.079R (n 1); s1h +0.184R (n 4)", fresh="c1h -0.034R (n 48); c4h -0.004R (n 13); c1d -0.569R (n 2); s1d -0.107R (n 17); s1h -0.510R (n 2)", verdict="fail", script="bitunix_templates.py",
+         notes="Too rare (1 to 17 design trades a chart) to judge"),
 ]
 
 
@@ -278,7 +316,7 @@ def main() -> None:
     lines = ["# Research ledger", "",
              "Every hypothesis tested for the sleeve, pass or fail. Generated by build_ledger.py from ledger.csv.", "",
              "**Gate:** net of fees (maker 0.02%, taker 0.06%) and slippage; longs pay funding at 0.03% a day; design t of 3 or more; the same sign in both halves; positive on the held-out period (run once) and on coins never used in design. Every variant is counted.", "",
-             f"**Tested:** {len(ENTRIES)} hypotheses. **Passed:** {len(passes)} ({', '.join(e['id'] for e in passes)}), all daily-signal long effects in crypto. No intraday construction has passed. Of the swing and position constructions tested on 23 October 2026, only SW10 (MAX-10 held as a swing) did.", "",
+             f"**Tested:** {len(ENTRIES)} hypotheses. **Passed:** {len(passes)} ({', '.join(e['id'] for e in passes)}), all daily-signal long effects in crypto. No intraday construction has passed. Of the swing and position constructions tested on 23 October 2026, only SW10 (MAX-10 held as a swing) did. None of the eleven Bitunix alert templates tested on 25 October 2026 passed on any chart.", "",
              "| ID | Date | Family | Hypothesis | Design | Held-out | Fresh | Verdict |", "|---|---|---|---|---|---|---|---|"]
     for e in ENTRIES:
         lines.append(f"| {e['id']} | {e['date']} | {e['family']} | {e['hypothesis']} | {e['design']} | {e['held_out']} | {e['fresh']} | {e['verdict']} |")

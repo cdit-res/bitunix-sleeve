@@ -43,7 +43,7 @@ below the middle band; A short: above it; B: close above EMA 50), on the same sy
 against the placebo mean of its symbol and set. 51 variants, every one counted.
 
 Data: crypto from static-klines (Binance spot), stocks from the feed's research folders (Yahoo), cached in ../data.
-Usage: python bitunix_templates.py fetch | run
+Usage: python bitunix_templates.py fetch | run | report
 """
 from __future__ import annotations
 
@@ -303,7 +303,9 @@ def tstat(x: pd.Series) -> float:
 
 
 def report(T: pd.DataFrame) -> None:
-    print(__doc__.split("\n\n")[0])
+    print(__doc__.split("\n")[0])
+    print("\n".join(f"  {k:5s} {v[3]} ({v[0]})" for k, v in TEMPLATES.items()))
+    print("  A exits at the Bollinger middle band or the 20th close; B on a 3 ATR chandelier trail, 200 bars at most.")
     print("\nNet R a trade. Design, its halves (h1, h2), held out and fresh; d = trade minus its placebo mean.")
     passes = 0
     for uni in UNIVERSES:
@@ -334,5 +336,7 @@ if __name__ == "__main__":
         T = run()
         T.to_csv(DATA / "trades.csv.gz", index=False)
         report(T)
+    elif cmd == "report":  # reprint from the saved trades without running again
+        report(pd.read_csv(DATA / "trades.csv.gz"))
     else:
         print(__doc__)

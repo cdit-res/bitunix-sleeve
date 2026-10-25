@@ -84,6 +84,7 @@ Each script's header records its settings, fixed before it was run.
 | swing_perps_fresh.py | SW10 on 40 further perps, delisted included | Supports SW10: +0.19R a trade (t 4.3) against +0.06R for its placebo; beats it on 33 of 40 coins |
 | swing_batch6.py | Cross-sectional momentum and low volatility on 50 perps; SW10 book across all 50 | Both fail; the 50-coin SW10 book wiped out at 4% a row (-100%), so the live book stays on the majors |
 | swing_resting.py | SW10 with resting buy-stop entries or resting sell-stop exits (hourly fills) | Both worse than entering and exiting at the 08:30 run after the daily close |
+| bitunix_templates.py | The eleven Bitunix Super Alert templates from the app (textbook settings, an exit per template) on crypto 1h, 4h and daily and stocks daily and 1h | None of 51 variants passes; nearest misses DEMA55 on crypto daily (t 2.3) and Bollinger oversold dips on stocks daily (t 1.6), both short of power |
 | fetch_data.py | Rebuilds `data/` from the public sources | |
 
 Rules for any change: net of fees, t of 3 or more, the same sign in both halves, a held-out period run once, fresh symbols, and a placebo the signal must beat. Count every variant tried. The full record is research/LEDGER.md and research/PROGRAMME.md.
